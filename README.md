@@ -102,3 +102,16 @@ http://IP_ADDRESS:8080
 ![Jenkins](images/04-jenkins.png)
 
 ---
+
+## 5. Mini CV
+
+A one-page CV was created using HTML5, CSS3 and JavaScript.
+
+The project was managed with Git and published on GitHub.
+
+![Mini CV](images/05-mini-cv.png)
+
+**GitHub:** `https://github.com/Sen-Se1/devsecops-portfolio`
+
+---
+

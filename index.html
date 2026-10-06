@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Houssem Mbarki - CV</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #e8eef7, #f8f9fb);
+            color: #333;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        /* Main CV */
+        .cv {
+            max-width: 900px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white;
+            text-align: center;
+            padding: 45px 20px;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 18px;
+            color: #d1d5db;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 30px;
+        }
+
+        section h2 {
+            font-size: 22px;
+            color: #1f2937;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            position: relative;
+        }
+
+        section h2::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 60px;
+            height: 2px;
+            background: #2563eb;
+        }
+
+        section p {
+            color: #555;
+            font-size: 15px;
+        }
+
+        /* Education */
+        .education {
+            background: #f8fafc;
+            padding: 18px;
+            border-left: 4px solid #2563eb;
+            border-radius: 6px;
+        }
+
+        .education h3 {
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .education span {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Skills */
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .skill:hover {
+            background: #2563eb;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Contact */
+        .contact {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .contact-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .contact-item strong {
+            display: block;
+            color: #1f2937;
+            margin-bottom: 3px;
+        }
+
+        .contact-item span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            background: #f8fafc;
+            padding: 20px;
+            color: #777;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+
+            body {
+                padding: 15px;
+            }
+
+            header h1 {
+                font-size: 30px;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .contact {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="cv">
+
+    <!-- Header -->
+    <header>
+        <h1>Houssem Mbarki</h1>
+        <p>DevOps Master Student</p>
+    </header>
+
+    <div class="content">
+
+        <!-- About -->
+        <section>
+            <h2>About Me</h2>
+
+            <p>
+                I am a motivated DevOps Master student interested in
+                cloud computing, automation, Linux systems and modern
+                IT technologies. I enjoy learning new technologies
+                and working on practical projects.
+            </p>
+        </section>
+
+        <!-- Education -->
+        <section>
+            <h2>Education</h2>
+
+            <div class="education">
+                <h3>Master's Degree in DevOps</h3>
+                <span>DevOps Master Student</span>
+            </div>
+        </section>
+
+        <!-- Skills -->
+        <section>
+            <h2>Skills</h2>
+
+            <div class="skills">
+                <span class="skill">Linux</span>
+                <span class="skill">Git</span>
+                <span class="skill">Docker</span>
+                <span class="skill">CI/CD</span>
+                <span class="skill">Cloud</span>
+                <span class="skill">Networking</span>
+            </div>
+        </section>
+
+        <!-- Experience -->
+        <section>
+            <h2>Experience</h2>
+
+            <p>
+                Academic projects and practical work related to
+                DevOps, Linux, Docker and CI/CD technologies.
+            </p>
+        </section>
+
+        <!-- Contact -->
+        <section>
+            <h2>Contact</h2>
+
+            <div class="contact">
+
+                <div class="contact-item">
+                    <strong>Email</strong>
+                    <span>houssem.mbarki@email.com</span>
+                </div>
+
+                <div class="contact-item">
+                    <strong>Location</strong>
+                    <span>Tunisia</span>
+                </div>
+
+                <div class="contact-item">
+                    <strong>GitHub</strong>
+                    <span>github.com/yourusername</span>
+                </div>
+
+                <div class="contact-item">
+                    <strong>LinkedIn</strong>
+                    <span>linkedin.com/in/yourusername</span>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        © 2026 Houssem Mbarki
+    </footer>
+
+</div>
+
+<script>
+    console.log("Houssem Mbarki CV loaded successfully.");
+</script>
+
+</body>
+</html>
