@@ -62,3 +62,43 @@ docker --version
 ![Docker installation](images/03-docker.png)
 
 ---
+
+## 4. Jenkins Installation
+
+
+Jenkins was deployed as a Docker container.
+
+```bash
+docker pull jenkins/jenkins:lts-jdk21
+```
+
+```bash
+docker run -d \
+  --name jenkins \
+  -p 8080:8080 \
+  -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  jenkins/jenkins:lts-jdk21
+```
+
+Check the container:
+
+```bash
+docker ps
+```
+
+Get the initial Jenkins password:
+
+```bash
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+Jenkins was accessed from the physical machine:
+
+```text
+http://IP_ADDRESS:8080
+```
+
+![Jenkins](images/04-jenkins.png)
+
+---
