@@ -1,7 +1,3 @@
-Yes 👍 Let's keep the `README.md` **very simple**, with only the required commands, a short sentence, and a screenshot for each step.
-
-You can use this structure directly.
-
 # DevSecOps Portfolio
 
 ## 1. Ubuntu Server and SSH
