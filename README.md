@@ -15,4 +15,14 @@ sudo systemctl status ssh
 ![SSH configuration](images/01-ssh.png)
 
 ---
+## 2. SSH Connection
 
+The SSH connection was tested from the physical machine.
+
+```bash
+ssh username@IP_ADDRESS
+```
+
+![SSH connection](images/02-ssh-connection.png)
+
+---
