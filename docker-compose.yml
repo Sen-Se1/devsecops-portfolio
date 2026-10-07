@@ -1,0 +1,6 @@
+services:
+  portfolio:
+    image: cv-docker
+    container_name: cv-portfolio
+    ports:
+      - "8081:80"
