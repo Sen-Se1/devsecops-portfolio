@@ -65,32 +65,37 @@ docker --version
 
 ## 4. Jenkins Installation
 
+Jenkins was installed as a service on Ubuntu Server.
 
-Jenkins was deployed as a Docker container.
+### Installation
 
 ```bash
-docker pull jenkins/jenkins:lts-jdk21
+sudo apt update
+sudo apt install fontconfig openjdk-21-jre -y
+
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+  
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt update
+sudo apt install jenkins -y
 ```
 
+### Start Jenkins
+
 ```bash
-docker run -d \
-  --name jenkins \
-  -p 8080:8080 \
-  -p 50000:50000 \
-  -v jenkins_home:/var/jenkins_home \
-  jenkins/jenkins:lts-jdk21
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
 ```
 
-Check the container:
+### Initial Password
 
 ```bash
-docker ps
-```
-
-Get the initial Jenkins password:
-
-```bash
-docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ```
 
 Jenkins was accessed from the physical machine:
