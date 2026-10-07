@@ -265,3 +265,19 @@ docker compose ps
 ![Docker Compose](images/12-docker-compose.png)
 
 ---
+
+## 14. GitHub Update
+
+The modifications were published on GitHub using SSH.
+
+```bash
+git add .
+git commit -m "Add DevSecOps portfolio and Docker"
+git push
+```
+
+**GitHub:** `https://github.com/Sen-Se1/devsecops-portfolio`
+
+![GitHub repository](images/13-github.png)
+
+---
