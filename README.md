@@ -143,6 +143,8 @@ git remote -v
 
 ---
 
+# DevSecOps Portfolio
+
 ## 7. DevSecOps Portfolio
 
 The Mini CV was improved into a small DevSecOps Portfolio.
@@ -201,3 +203,20 @@ const projects = [
 
 ---
 
+# Dockerization
+
+## 10. Dockerfile
+
+A Dockerfile was created to serve the portfolio using Nginx.
+
+```dockerfile
+FROM nginx:alpine
+
+COPY index.html /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+---
