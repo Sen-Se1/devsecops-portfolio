@@ -1,6 +1,8 @@
 # DevSecOps Portfolio
 
-## 1. Ubuntu Server and SSH
+## I. Initial setup
+
+### 1. Ubuntu Server and SSH
 
 Ubuntu Server 26.04 was installed and SSH was configured.
 
@@ -16,7 +18,7 @@ sudo systemctl status ssh
 
 ---
 
-## 2. SSH Connection
+### 2. SSH Connection
 
 The SSH connection was tested from the physical machine.
 
@@ -28,7 +30,7 @@ ssh username@IP_ADDRESS
 
 ---
 
-## 3. Docker Installation
+### 3. Docker Installation
 
 Docker was installed on the Ubuntu Server.
 
@@ -63,11 +65,11 @@ docker --version
 
 ---
 
-## 4. Jenkins Installation
+### 4. Jenkins Installation
 
 Jenkins was installed as a service on Ubuntu Server.
 
-### Installation
+#### Installation
 
 ```bash
 sudo apt update
@@ -75,7 +77,7 @@ sudo apt install fontconfig openjdk-21-jre -y
 
 sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
   https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
-  
+
 echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
   https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
   /etc/apt/sources.list.d/jenkins.list > /dev/null
@@ -84,7 +86,7 @@ sudo apt update
 sudo apt install jenkins -y
 ```
 
-### Start Jenkins
+#### Start Jenkins
 
 ```bash
 sudo systemctl enable jenkins
@@ -92,7 +94,7 @@ sudo systemctl start jenkins
 sudo systemctl status jenkins
 ```
 
-### Initial Password
+#### Initial Password
 
 ```bash
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
@@ -108,7 +110,7 @@ http://IP_ADDRESS:8080
 
 ---
 
-## 5. Mini CV
+### 5. Mini CV
 
 A one-page CV was created using HTML5, CSS3 and JavaScript.
 
@@ -120,7 +122,7 @@ The project was managed with Git and published on GitHub.
 
 ---
 
-## 6. GitHub SSH
+### 6. GitHub SSH
 
 An SSH key was created and added to GitHub.
 
@@ -148,13 +150,13 @@ git remote -v
 
 ---
 
-# DevSecOps Portfolio
+## II. Evolution of the mini-CV to DevSecOps Portfolio
 
-## 7. DevSecOps Portfolio
+### 7. DevSecOps Portfolio
 
 The Mini CV was improved into a small DevSecOps Portfolio.
 
-### Improvements
+#### Improvements
 
 - Added a navigation bar.
 - Added About section.
@@ -168,7 +170,7 @@ The Mini CV was improved into a small DevSecOps Portfolio.
 
 ---
 
-## 8. DevSecOps Skills
+### 8. DevSecOps Skills
 
 A DevSecOps Skills section was added with the main technologies used in the project.
 
@@ -185,11 +187,11 @@ Technologies:
 
 ---
 
-## 9. Dynamic Projects
+### 9. Dynamic Projects
 
 The Projects section is generated dynamically using JavaScript from an array of objects.
 
-### JavaScript
+#### JavaScript
 
 ```javascript
 const projects = [
@@ -208,9 +210,9 @@ const projects = [
 
 ---
 
-# Dockerization
+## III. Initial Dockerization
 
-## 10. Dockerfile
+### 10. Dockerfile
 
 A Dockerfile was created to serve the portfolio using Nginx.
 
@@ -226,7 +228,7 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ---
 
-## 11. Docker Image
+### 11. Docker Image
 
 The Docker image was built with the name `cv-docker`.
 
@@ -239,7 +241,7 @@ docker images
 
 ---
 
-## 12. Docker Container
+### 12. Docker Container
 
 The portfolio was started in a Docker container.
 
@@ -258,7 +260,7 @@ http://IP_ADDRESS:8080
 
 ---
 
-## 13. Docker Compose
+### 13. Docker Compose
 
 The portfolio was deployed using Docker Compose.
 
@@ -271,7 +273,7 @@ docker compose ps
 
 ---
 
-## 14. GitHub Update
+### 14. GitHub Update
 
 The modifications were published on GitHub using SSH.
 
@@ -286,3 +288,7 @@ git push
 ![GitHub repository](images/13-github.png)
 
 ---
+
+## IV. First introduction to automation
+
+### 15. Vagrant
