@@ -161,3 +161,19 @@ The Mini CV was improved into a small DevSecOps Portfolio.
 
 ---
 
+## 8. DevSecOps Skills
+
+A DevSecOps Skills section was added with the main technologies used in the project.
+
+Technologies:
+- Git
+- Docker
+- Jenkins
+- Kubernetes
+- Ansible
+- Terraform
+- Argo CD
+
+![DevSecOps Skills](images/08-skills.png)
+
+---
