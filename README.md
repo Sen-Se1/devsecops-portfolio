@@ -220,3 +220,16 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 ---
+
+## 11. Docker Image
+
+The Docker image was built with the name `cv-docker`.
+
+```bash
+docker build -t cv-docker .
+docker images
+```
+
+![Docker image](images/10-docker-build.png)
+
+---
