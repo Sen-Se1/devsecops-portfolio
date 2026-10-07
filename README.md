@@ -292,3 +292,90 @@ git push
 ## IV. First introduction to automation
 
 ### 15. Vagrant
+
+Vagrant was installed inside the Ubuntu Server VM using the official HashiCorp documentation.
+
+#### Install Vagrant
+
+```bash
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+sudo apt update
+sudo apt install vagrant -y
+```
+
+Check the installation:
+
+```bash
+vagrant --version
+```
+
+#### Configure KVM / Libvirt
+
+The VM supports nested virtualization.
+
+```bash
+systemd-detect-virt
+lscpu | grep -i virtualization
+```
+
+KVM and Libvirt were installed:
+
+```bash
+sudo apt update
+sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients virtinst -y
+```
+
+The required development dependencies were installed for the Vagrant Libvirt provider:
+
+```bash
+sudo apt install build-essential -y
+sudo apt install libvirt-dev libxml2-dev libxslt1-dev ruby-dev pkg-config -y
+```
+
+The current user was added to the required groups:
+
+```bash
+sudo usermod -aG libvirt $USER
+sudo usermod -aG kvm $USER
+newgrp libvirt
+```
+
+#### Install Vagrant Libvirt Provider
+
+```bash
+vagrant plugin install vagrant-libvirt
+```
+
+Check the provider:
+
+```bash
+vagrant plugin list
+```
+
+#### Vagrantfile
+
+```ruby
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "generic/ubuntu2204"
+
+  config.vm.hostname = "devsecops-vm"
+
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.memory = 2048
+    libvirt.cpus = 1
+  end
+
+end
+```
+
+The VM was created using:
+
+```bash
+vagrant up --provider=libvirt
+```
+
+![Vagrant up](images/15-vagrant-up.png)
