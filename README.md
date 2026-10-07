@@ -362,10 +362,11 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = "generic/ubuntu2204"
 
+  config.vm.define "devsecops-vm"
   config.vm.hostname = "devsecops-vm"
 
   config.vm.provider :libvirt do |libvirt|
-    libvirt.memory = 2048
+    libvirt.memory = 1024
     libvirt.cpus = 1
   end
 
@@ -400,7 +401,7 @@ Vagrant allows the VM to be created automatically from a `Vagrantfile`, while ma
 
 ### 17. Vagrant Configuration
 
-The `Vagrantfile` was modified to automatically configure the VM hostname, private IP address, memory and CPU.
+The `Vagrantfile` was modified to automatically configure the VM name, hostname, private IP address, memory and CPU.
 
 #### Vagrantfile
 
@@ -409,12 +410,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = "generic/ubuntu2204"
 
+  config.vm.define "devsecops-vm-update"
+
   config.vm.hostname = "devsecops-vm-update"
 
-  config.vm.network "private_network", ip: "192.168.121.100"
+  config.vm.network "private_network", ip: "192.168.56.10"
 
   config.vm.provider :libvirt do |libvirt|
-    libvirt.memory = 3072
+    libvirt.memory = 2048
     libvirt.cpus = 2
   end
 
@@ -424,7 +427,11 @@ end
 #### Apply the Configuration
 
 ```bash
-vagrant reload --provider=libvirt
+vagrant destroy -f
+```
+
+```bash
+vagrant up --provider=libvirt
 ```
 
 #### Check VM Status
@@ -438,9 +445,20 @@ Example result:
 ```text
 Current machine states:
 
-default                   running (libvirt)
+devsecops-vm-update       running (libvirt)
 ```
 
 ![Vagrant Status](images/17-vagrant-status.png)
 
-The VM is automatically configured with the hostname `devsecops-vm-update`, a private IP address, 3 GB of RAM and 2 CPUs.
+The VM is automatically configured with the name and hostname `devsecops-vm-update`, the private IP address `192.168.56.10`, 2 GB of RAM and 2 CPUs.
+
+#### Why not use `vagrant reload --provider=libvirt`?
+
+`vagrant reload` only halts and restarts an **existing** VM. It does not fit this change, for these reasons:
+
+- **The VM name changed.** `config.vm.define` sets the machine name, so Vagrant treats `devsecops-vm-update` as a new machine. No libvirt domain exists for it yet, and `reload` fails with "Domain is not created. Please run `vagrant up` first". The VM has to be created with `vagrant up`.
+- **Network changes may not apply cleanly.** After adding the private network, Vagrant warned that the number of network adapters in the config (2) differed from the attached interfaces (1) and "may have incorrectly updated". A reload can keep the old interface layout, whereas recreating the VM guarantees `eth1` with the private IP.
+- **The `--provider` flag is useless on reload.** The provider is fixed when the machine is created, so `--provider=libvirt` is ignored. It only matters on the first `vagrant up`.
+- **Reproducibility.** `vagrant destroy -f` followed by `vagrant up` rebuilds the VM entirely from the Vagrantfile, which proves the configuration is fully automatic and leaves no leftovers from the old setup.
+
+`vagrant reload` is still fine for small changes to an existing VM, such as memory or CPU only.
