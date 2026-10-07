@@ -392,7 +392,7 @@ vagrant ssh
 
 ![Vagrant SSH](images/16-vagrant-ssh.png)
 
-### Comparison
+#### Comparison
 
 Vagrant allows the VM to be created automatically from a `Vagrantfile`, while manual VM creation requires configuring the VM step by step.
 
