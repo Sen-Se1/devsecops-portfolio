@@ -115,3 +115,30 @@ The project was managed with Git and published on GitHub.
 
 ---
 
+## 6. GitHub SSH
+
+An SSH key was created and added to GitHub.
+
+```bash
+ssh-keygen -t ed25519 -C "your@email.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub
+```
+
+SSH connection was tested:
+
+```bash
+ssh -T git@github.com
+```
+
+The repository was configured to use SSH:
+
+```bash
+git remote set-url origin git@github.com:Sen-Se1/devsecops-portfolio.git
+git remote -v
+```
+
+![GitHub SSH](images/06-github-ssh.png)
+
+---
