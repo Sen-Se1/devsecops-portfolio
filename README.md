@@ -397,3 +397,50 @@ vagrant ssh
 Vagrant allows the VM to be created automatically from a `Vagrantfile`, while manual VM creation requires configuring the VM step by step.
 
 ---
+
+### 17. Vagrant Configuration
+
+The `Vagrantfile` was modified to automatically configure the VM hostname, private IP address, memory and CPU.
+
+#### Vagrantfile
+
+```ruby
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "generic/ubuntu2204"
+
+  config.vm.hostname = "devsecops-vm-update"
+
+  config.vm.network "private_network", ip: "192.168.121.100"
+
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.memory = 3072
+    libvirt.cpus = 2
+  end
+
+end
+```
+
+#### Apply the Configuration
+
+```bash
+vagrant reload --provider=libvirt
+```
+
+#### Check VM Status
+
+```bash
+vagrant status
+```
+
+Example result:
+
+```text
+Current machine states:
+
+default                   running (libvirt)
+```
+
+![Vagrant Status](images/17-vagrant-status.png)
+
+The VM is automatically configured with the hostname `devsecops-vm-update`, a private IP address, 3 GB of RAM and 2 CPUs.
