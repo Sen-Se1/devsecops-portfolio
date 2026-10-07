@@ -252,3 +252,16 @@ http://IP_ADDRESS:8080
 ![Docker container](images/11-docker-run.png)
 
 ---
+
+## 13. Docker Compose
+
+The portfolio was deployed using Docker Compose.
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+![Docker Compose](images/12-docker-compose.png)
+
+---
