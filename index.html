@@ -3,127 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Houssem Mbarki - CV</title>
+    <title>Houssem Mbarki - DevSecOps Portfolio</title>
 
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background: linear-gradient(135deg, #e8eef7, #f8f9fb);
-            color: #333;
+            background: #f4f7fb;
+            color: #1f2937;
             line-height: 1.6;
-            padding: 40px 20px;
         }
 
-        /* Main CV */
-        .cv {
-            max-width: 900px;
-            margin: auto;
-            background: #ffffff;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #111827;
+            padding: 15px 30px;
+            text-align: center;
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #1f2937, #374151);
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            color: #60a5fa;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #111827, #2563eb);
             color: white;
             text-align: center;
-            padding: 45px 20px;
+            padding: 90px 20px;
         }
 
-        header h1 {
-            font-size: 38px;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
+        .hero h1 {
+            font-size: 45px;
+            margin-bottom: 10px;
         }
 
-        header p {
-            font-size: 18px;
-            color: #d1d5db;
+        .hero p {
+            font-size: 20px;
+            color: #dbeafe;
         }
 
-        /* Content */
-        .content {
-            padding: 40px;
+        .hero .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: white;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.3s;
         }
 
-        /* Sections */
+        .hero .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Main */
+        main {
+            max-width: 1000px;
+            margin: auto;
+            padding: 50px 20px;
+        }
+
         section {
+            background: white;
             margin-bottom: 30px;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
         }
 
         section h2 {
-            font-size: 22px;
+            font-size: 28px;
+            margin-bottom: 20px;
             color: #1f2937;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
             border-bottom: 2px solid #e5e7eb;
-            position: relative;
-        }
-
-        section h2::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            bottom: -2px;
-            width: 60px;
-            height: 2px;
-            background: #2563eb;
-        }
-
-        section p {
-            color: #555;
-            font-size: 15px;
-        }
-
-        /* Education */
-        .education {
-            background: #f8fafc;
-            padding: 18px;
-            border-left: 4px solid #2563eb;
-            border-radius: 6px;
-        }
-
-        .education h3 {
-            color: #1f2937;
-            margin-bottom: 5px;
-        }
-
-        .education span {
-            color: #6b7280;
-            font-size: 14px;
+            padding-bottom: 10px;
         }
 
         /* Skills */
         .skills {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
 
         .skill {
+            padding: 10px 18px;
             background: #eff6ff;
             color: #2563eb;
             border: 1px solid #bfdbfe;
-            padding: 8px 15px;
             border-radius: 20px;
-            font-size: 14px;
             font-weight: bold;
+        }
+
+        /* Projects */
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .project {
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
             transition: 0.3s;
         }
 
-        .skill:hover {
-            background: #2563eb;
-            color: white;
-            transform: translateY(-2px);
+        .project:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .project h3 {
+            margin-bottom: 10px;
+            color: #2563eb;
+        }
+
+        /* Experience */
+        .experience {
+            border-left: 4px solid #2563eb;
+            padding-left: 20px;
+        }
+
+        .experience h3 {
+            margin-bottom: 5px;
+        }
+
+        .experience span {
+            color: #6b7280;
+            font-size: 14px;
         }
 
         /* Contact */
@@ -137,45 +168,34 @@
             background: #f8fafc;
             padding: 15px;
             border-radius: 8px;
-            border: 1px solid #e5e7eb;
         }
 
         .contact-item strong {
             display: block;
-            color: #1f2937;
-            margin-bottom: 3px;
-        }
-
-        .contact-item span {
-            color: #666;
-            font-size: 14px;
+            margin-bottom: 5px;
         }
 
         /* Footer */
         footer {
             text-align: center;
-            background: #f8fafc;
-            padding: 20px;
-            color: #777;
-            font-size: 13px;
-            border-top: 1px solid #eee;
+            background: #111827;
+            color: #d1d5db;
+            padding: 25px;
         }
 
         /* Responsive */
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
 
-            body {
-                padding: 15px;
+            nav a {
+                margin: 0 6px;
+                font-size: 14px;
             }
 
-            header h1 {
-                font-size: 30px;
+            .hero h1 {
+                font-size: 32px;
             }
 
-            .content {
-                padding: 25px;
-            }
-
+            .projects,
             .contact {
                 grid-template-columns: 1fr;
             }
@@ -185,40 +205,38 @@
 
 <body>
 
-<div class="cv">
+    <!-- Navigation -->
+    <nav>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+    </nav>
 
-    <!-- Header -->
-    <header>
+    <!-- Hero -->
+    <header class="hero">
         <h1>Houssem Mbarki</h1>
         <p>DevOps Master Student</p>
+        <a href="#contact" class="btn">Contact Me</a>
     </header>
 
-    <div class="content">
+    <main>
 
         <!-- About -->
-        <section>
-            <h2>About Me</h2>
+        <section id="about">
+            <h2>About</h2>
 
             <p>
-                I am a motivated DevOps Master student interested in
-                cloud computing, automation, Linux systems and modern
-                IT technologies. I enjoy learning new technologies
-                and working on practical projects.
+                I am a DevOps Master student interested in automation,
+                cloud computing, Linux systems and modern IT technologies.
+                I enjoy learning new technologies and building practical
+                projects.
             </p>
         </section>
 
-        <!-- Education -->
-        <section>
-            <h2>Education</h2>
-
-            <div class="education">
-                <h3>Master's Degree in DevOps</h3>
-                <span>DevOps Master Student</span>
-            </div>
-        </section>
-
         <!-- Skills -->
-        <section>
+        <section id="skills">
             <h2>Skills</h2>
 
             <div class="skills">
@@ -231,56 +249,84 @@
             </div>
         </section>
 
+        <!-- Projects -->
+        <section id="projects">
+            <h2>Projects</h2>
+
+            <div class="projects">
+
+                <div class="project">
+                    <h3>Mini CV</h3>
+                    <p>
+                        One-page CV developed using HTML5, CSS3
+                        and JavaScript.
+                    </p>
+                </div>
+
+                <div class="project">
+                    <h3>DevOps Lab</h3>
+                    <p>
+                        Practical environment using Linux, Git,
+                        Docker and CI/CD technologies.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
         <!-- Experience -->
-        <section>
+        <section id="experience">
             <h2>Experience</h2>
 
-            <p>
-                Academic projects and practical work related to
-                DevOps, Linux, Docker and CI/CD technologies.
-            </p>
+            <div class="experience">
+                <h3>DevOps Student Projects</h3>
+                <span>Academic Projects</span>
+
+                <p>
+                    Worked on practical projects involving Linux,
+                    Docker, Git and CI/CD environments.
+                </p>
+            </div>
         </section>
 
         <!-- Contact -->
-        <section>
+        <section id="contact">
             <h2>Contact</h2>
 
             <div class="contact">
 
                 <div class="contact-item">
                     <strong>Email</strong>
-                    <span>houssem.mbarki@email.com</span>
+                    houssem.mbarki@email.com
                 </div>
 
                 <div class="contact-item">
                     <strong>Location</strong>
-                    <span>Tunisia</span>
+                    Tunisia
                 </div>
 
                 <div class="contact-item">
                     <strong>GitHub</strong>
-                    <span>github.com/yourusername</span>
+                    github.com/yourusername
                 </div>
 
                 <div class="contact-item">
                     <strong>LinkedIn</strong>
-                    <span>linkedin.com/in/yourusername</span>
+                    linkedin.com/in/yourusername
                 </div>
 
             </div>
         </section>
 
-    </div>
+    </main>
 
     <footer>
         © 2026 Houssem Mbarki
     </footer>
 
-</div>
-
-<script>
-    console.log("Houssem Mbarki CV loaded successfully.");
-</script>
+    <script>
+        console.log("DevSecOps Portfolio loaded successfully.");
+    </script>
 
 </body>
 </html>

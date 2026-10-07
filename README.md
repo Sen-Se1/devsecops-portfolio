@@ -142,3 +142,22 @@ git remote -v
 ![GitHub SSH](images/06-github-ssh.png)
 
 ---
+
+## 7. DevSecOps Portfolio
+
+The Mini CV was improved into a small DevSecOps Portfolio.
+
+### Improvements
+
+- Added a navigation bar.
+- Added About section.
+- Added Skills section.
+- Added Projects section.
+- Added Experience section.
+- Added Contact section.
+- Improved the design and responsive layout.
+
+![DevSecOps Portfolio](images/07-portfolio.png)
+
+---
+
