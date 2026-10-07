@@ -379,3 +379,17 @@ vagrant up --provider=libvirt
 ```
 
 ![Vagrant up](images/15-vagrant-up.png)
+
+---
+
+### 16. Vagrant SSH
+
+The VM created by Vagrant was accessed using:
+
+```bash
+vagrant ssh
+```
+
+![Vagrant SSH](images/16-vagrant-ssh.png)
+
+---
