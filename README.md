@@ -233,3 +233,22 @@ docker images
 ![Docker image](images/10-docker-build.png)
 
 ---
+
+## 12. Docker Container
+
+The portfolio was started in a Docker container.
+
+```bash
+docker run -d --name cv-container -p 8080:80 cv-docker
+docker ps
+```
+
+The portfolio was accessed from the physical machine:
+
+```text
+http://IP_ADDRESS:8080
+```
+
+![Docker container](images/11-docker-run.png)
+
+---
