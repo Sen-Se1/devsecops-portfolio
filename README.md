@@ -177,3 +177,27 @@ Technologies:
 ![DevSecOps Skills](images/08-skills.png)
 
 ---
+
+## 9. Dynamic Projects
+
+The Projects section is generated dynamically using JavaScript from an array of objects.
+
+### JavaScript
+
+```javascript
+const projects = [
+    {
+        title: "Mini CV",
+        description: "One-page CV developed using HTML5, CSS3 and JavaScript."
+    },
+    {
+        title: "DevOps Lab",
+        description: "Practical environment using Linux, Git, Docker and CI/CD."
+    }
+];
+```
+
+![Dynamic Projects](images/09-projects.png)
+
+---
+
