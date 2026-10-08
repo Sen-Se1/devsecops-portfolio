@@ -521,3 +521,32 @@ The `page.js` file currently contains the Next.js Portfolio, while `globals.css`
 #### Application Screenshot
 
 ![DevSecOps Portfolio - Next.js](images/18-nextjs.png)
+
+---
+
+### 19. Creating Reusable Components
+
+The main parts of the Portfolio were transformed into reusable TypeScript components.
+
+#### Component Structure
+
+```text
+devsecops-portfolio-next/
+├── app/
+│   ├── page.tsx
+│   ├── globals.css
+│   └── layout.tsx
+├── components/
+│   ├── Header.tsx
+│   ├── About.tsx
+│   ├── Skills.tsx
+│   ├── Projects.tsx
+│   ├── Contact.tsx
+│   └── Footer.tsx
+├── public/
+└── package.json
+```
+
+The components are used in `app/page.tsx` to build the Portfolio page.
+
+---
