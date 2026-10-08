@@ -23,7 +23,7 @@ sudo systemctl status ssh
 The SSH connection was tested from the physical machine.
 
 ```bash
-ssh username@IP_ADDRESS
+ssh houssem@192.168.122.125
 ```
 
 ![SSH connection](images/02-ssh-connection.png)
@@ -253,7 +253,7 @@ docker ps
 The portfolio was accessed from the physical machine:
 
 ```text
-http://IP_ADDRESS:8080
+http://192.168.122.125:8080
 ```
 
 ![Docker container](images/11-docker-run.png)
@@ -462,3 +462,62 @@ The VM is automatically configured with the name and hostname `devsecops-vm-upda
 - **Reproducibility.** `vagrant destroy -f` followed by `vagrant up` rebuilds the VM entirely from the Vagrantfile, which proves the configuration is fully automatic and leaves no leftovers from the old setup.
 
 `vagrant reload` is still fine for small changes to an existing VM, such as memory or CPU only.
+
+---
+
+## V. Portfolio migration to Next.js
+
+### 18. Creating the DevSecOps Portfolio with Next.js
+
+A new version of the **DevSecOps Portfolio** was created using **Next.js**.
+
+The new version keeps the main sections from the HTML5/CSS3/JavaScript version:
+
+- **About**
+- **DevSecOps Skills**
+- **Projects**
+- **Experience**
+- **Contact**
+- **Footer**
+
+The skills and projects are displayed dynamically from JavaScript arrays using the `.map()` method.
+
+#### Creating the Next.js Project
+
+The project was created using the following command:
+
+```bash
+npx create-next-app@latest devsecops-portfolio-next --yes
+```
+
+Then:
+
+```bash
+cd devsecops-portfolio-next
+npm run dev
+```
+
+The application is accessible from the physical machine through port `3000`:
+
+```text
+http://192.168.122.125:3000
+```
+
+#### Current Structure
+
+```text
+devsecops-portfolio-next/
+├── app/
+│   ├── page.js
+│   ├── globals.css
+│   └── layout.js
+├── public/
+├── package.json
+└── ...
+```
+
+The `page.js` file currently contains the Next.js Portfolio, while `globals.css` contains its styling.
+
+#### Application Screenshot
+
+![DevSecOps Portfolio - Next.js](images/18-nextjs.png)
