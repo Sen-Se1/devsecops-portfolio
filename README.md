@@ -745,6 +745,32 @@ The Pipeline was executed successfully and the `Install Dependencies` stage comp
 
 ---
 
+### 24. Building the Next.js Application
 
+A `Build Next.js` stage was added to the Jenkins Pipeline to automatically build the Next.js application.
 
----
+The stage executes `npm run build` inside the `devsecops-portfolio-next` directory.
+
+#### Jenkinsfile
+
+```groovy
+stage('Build Next.js') {
+    steps {
+        dir('devsecops-portfolio-next') {
+            sh 'npm run build'
+        }
+    }
+}
+```
+
+#### Pipeline Execution
+
+The Jenkins Pipeline was executed successfully. The `Build Next.js` stage automatically built the Next.js application.
+
+![Next.js Build Result](images/24-nextjs-build.png)
+
+The console output confirms that the Next.js application was compiled successfully and the pipeline finished with:
+
+```text
+Finished: SUCCESS
+```

@@ -16,5 +16,13 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Next.js') {
+            steps {
+                dir('devsecops-portfolio-next') {
+                    sh 'npm run build'
+                }
+            }
+        }
     }
 }
