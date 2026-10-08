@@ -550,3 +550,81 @@ devsecops-portfolio-next/
 The components are used in `app/page.tsx` to build the Portfolio page.
 
 ---
+
+### 20. Separating Project and Skill Data
+
+The project and skill information was moved into separate data files to keep the components clean and easier to maintain.
+
+#### Data Structure
+
+```text
+devsecops-portfolio-next/
+├── app/
+│   ├── page.tsx
+│   ├── globals.css
+│   └── layout.tsx
+├── components/
+│   ├── Header.tsx
+│   ├── About.tsx
+│   ├── Skills.tsx
+│   ├── Projects.tsx
+│   ├── Contact.tsx
+│   └── Footer.tsx
+├── data/
+│   ├── skills.ts
+│   └── projects.ts
+├── public/
+└── package.json
+```
+
+#### Example of Skills Data
+
+```ts
+export const skills: string[] = [
+  "Git",
+  "Docker",
+  "Jenkins",
+  "Kubernetes",
+  "Ansible",
+  "Terraform",
+  "Argo CD",
+];
+```
+
+#### Example of Projects Data
+
+```ts
+export type Project = {
+  title: string;
+  description: string;
+};
+
+export const projects: Project[] = [
+  {
+    title: "Mini CV",
+    description:
+      "One-page CV developed using HTML5, CSS3 and JavaScript.",
+  },
+  {
+    title: "DevOps Lab",
+    description:
+      "Practical environment using Linux, Git, Docker and CI/CD.",
+  },
+  {
+    title: "Docker Portfolio",
+    description:
+      "Portfolio application containerized using Docker and Nginx.",
+  },
+  {
+    title: "Jenkins CI/CD",
+    description:
+      "Continuous integration environment using Jenkins and Docker.",
+  },
+];
+```
+
+The `Skills.tsx` and `Projects.tsx` components import this data and use it to dynamically display the skills and projects.
+
+---
+
+---

@@ -1,12 +1,4 @@
-const skills: string[] = [
-  "Git",
-  "Docker",
-  "Jenkins",
-  "Kubernetes",
-  "Ansible",
-  "Terraform",
-  "Argo CD",
-];
+import { skills } from "../data/skills";
 
 export default function Skills() {
   return (
