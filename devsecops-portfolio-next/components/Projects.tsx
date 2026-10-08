@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { projects } from "../data/projects";
 
 export default function Projects() {
@@ -7,9 +8,17 @@ export default function Projects() {
 
       <div className="projects">
         {projects.map((project) => (
-          <div className="project" key={project.title}>
+          <div className="project" key={project.slug}>
             <h3>{project.title}</h3>
+
             <p>{project.description}</p>
+
+            <Link
+              href={`/projects/${project.slug}`}
+              className="btn"
+            >
+              View Project
+            </Link>
           </div>
         ))}
       </div>

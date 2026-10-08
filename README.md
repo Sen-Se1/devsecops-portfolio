@@ -627,4 +627,40 @@ The `Skills.tsx` and `Projects.tsx` components import this data and use it to dy
 
 ---
 
+### 21. Creating Dedicated Project Pages
+
+A dedicated project section was added to the Next.js Portfolio.
+
+The `/projects` page displays all available projects, while the dynamic route `/projects/project-name` displays the details of a specific project.
+
+#### Routes
+
+```text
+/projects
+/projects/mini-cv
+/projects/devops-lab
+/projects/docker-portfolio
+/projects/jenkins-cicd
+```
+
+#### Project Page Structure
+
+```text
+app/
+└── projects/
+    ├── page.tsx
+    └── [project-name]/
+        └── page.tsx
+```
+
+The projects are loaded from the separate `data/projects.ts` file, and each project has a unique `slug` used to generate its URL.
+
+#### Screenshot
+
+![Projects Page](images/21-projects.png)
+
+![Project Details Page](images/21-project-details.png)
+
+---
+
 ---
