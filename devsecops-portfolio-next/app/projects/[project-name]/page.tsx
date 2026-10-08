@@ -3,13 +3,15 @@ import { notFound } from "next/navigation";
 import { projects } from "../../../data/projects";
 
 type ProjectPageProps = {
-  params: {
+  params: Promise<{
     "project-name": string;
-  };
+  }>;
 };
 
-export default function ProjectPage({ params }: ProjectPageProps) {
-  const projectName = params["project-name"];
+export default async function ProjectPage({
+  params,
+}: ProjectPageProps) {
+  const { "project-name": projectName } = await params;
 
   const project = projects.find(
     (project) => project.slug === projectName
