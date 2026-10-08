@@ -663,4 +663,58 @@ The projects are loaded from the separate `data/projects.ts` file, and each proj
 
 ---
 
+## VI. Premier pipeline Jenkins
+
+### 22. Creating the First Jenkins Pipeline
+
+A Jenkins Pipeline was created to automatically retrieve the DevSecOps Portfolio repository from GitHub.
+
+The Pipeline uses a `Jenkinsfile` stored at the root of the repository.
+
+#### Jenkinsfile
+
+```groovy
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Sen-Se1/devsecops-portfolio.git'
+            }
+        }
+    }
+}
+```
+
+The `Checkout` stage automatically retrieves the `main` branch of the GitHub repository.
+
+#### Jenkins Pipeline Configuration
+
+```text
+Definition: Pipeline script from SCM
+SCM: Git
+Repository: https://github.com/Sen-Se1/devsecops-portfolio.git
+Branch: */main
+Script Path: Jenkinsfile
+```
+
+#### Pipeline Execution
+
+The Jenkins Pipeline was successfully executed. Jenkins retrieved the GitHub repository and checked out the `main` branch.
+
+![Jenkins Pipeline Execution](images/22-jenkins-pipeline.png)
+
+The console output confirms:
+
+```text
+[Pipeline] End of Pipeline
+Finished: SUCCESS
+```
+
+This confirms that Jenkins successfully connected to the GitHub repository and executed the first pipeline.
+
+---
+
 ---
