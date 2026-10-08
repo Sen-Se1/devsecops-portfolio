@@ -717,4 +717,30 @@ This confirms that Jenkins successfully connected to the GitHub repository and e
 
 ---
 
+### 23. Installing Next.js Dependencies
+
+An `Install Dependencies` stage was added to the Jenkins Pipeline.
+
+This stage enters the Next.js project directory and installs all required dependencies using `npm install`.
+
+#### Jenkinsfile
+
+```groovy
+stage('Install Dependencies') {
+    steps {
+        dir('devsecops-portfolio-next') {
+            sh 'npm install'
+        }
+    }
+}
+```
+
+The `dir()` step ensures that the command is executed inside the `devsecops-portfolio-next` directory.
+
+#### Pipeline Execution
+
+The Pipeline was executed successfully and the `Install Dependencies` stage completed the Next.js dependency installation.
+
+![Install Dependencies Stage](images/23-install-dependencies.png)
+
 ---
