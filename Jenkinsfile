@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -10,5 +9,12 @@ pipeline {
             }
         }
 
+        stage('Install Dependencies') {
+            steps {
+                dir('devsecops-portfolio-next') {
+                    sh 'npm install'
+                }
+            }
+        }
     }
 }
