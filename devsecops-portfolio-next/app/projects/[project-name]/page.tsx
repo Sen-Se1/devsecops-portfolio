@@ -8,6 +8,10 @@ type ProjectPageProps = {
   }>;
 };
 
+export function generateStaticParams() {
+  return projects.map((project) => ({ "project-name": project.slug }));
+}
+
 export default async function ProjectPage({
   params,
 }: ProjectPageProps) {
