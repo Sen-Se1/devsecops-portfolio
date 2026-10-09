@@ -61,6 +61,13 @@ sudo systemctl start docker
 docker --version
 ```
 
+To add your current user to the docker group without logging out, run:
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
 ![Docker installation](images/03-docker.png)
 
 ---
