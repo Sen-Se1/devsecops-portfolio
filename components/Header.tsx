@@ -9,9 +9,7 @@ export default function Header() {
         <a href="#contact">Contact</a>
       </nav>
 
-      <header className="hero">
-        <h2>Hello, I'm</h2>
-        
+      <header className="hero">        
         <h1>Houssem Mbarki</h1>
 
         <p>DevOps Master Student</p>
