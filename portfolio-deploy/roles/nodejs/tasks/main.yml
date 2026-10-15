@@ -9,7 +9,7 @@
 - name: Configure NodeSource repository
   ansible.builtin.command:
     cmd: "/tmp/nodesource_setup.sh"
-    creates: /etc/apt/sources.list.d/nodesource.list
+    creates: /etc/apt/sources.list.d/nodesource.sources
   become: true
 
 - name: Install Node.js
@@ -25,3 +25,5 @@
     global: true
     state: present
   become: true
+
+

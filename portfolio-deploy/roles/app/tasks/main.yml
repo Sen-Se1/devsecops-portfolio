@@ -28,6 +28,18 @@
   changed_when: true
   notify: restart app
 
+- name: Check whether portfolio exists in PM2
+  ansible.builtin.command:
+    cmd: pm2 describe portfolio
+  become: true
+  become_user: "{{ app_user }}"
+  environment:
+    HOME: "/home/{{ app_user }}"
+    PM2_HOME: "/home/{{ app_user }}/.pm2"
+  register: pm2_describe
+  changed_when: false
+  failed_when: false
+
 - name: Start application with PM2
   ansible.builtin.command:
     cmd: "pm2 start npm --name portfolio -- start -- --port {{ app_port }}"
@@ -37,8 +49,5 @@
   environment:
     HOME: "/home/{{ app_user }}"
     PM2_HOME: "/home/{{ app_user }}/.pm2"
-  register: pm2_start_result
-  changed_when: "'online' in pm2_start_result.stdout or 'Starting' in pm2_start_result.stdout"
-  failed_when:
-    - pm2_start_result.rc != 0
-    - "'already' not in (pm2_start_result.stderr | default('') | lower)"
+  when: pm2_describe.rc != 0
+  changed_when: true
