@@ -10,6 +10,8 @@ export default function Header() {
       </nav>
 
       <header className="hero">
+        <h2>Hello, I'm</h2>
+        
         <h1>Houssem Mbarki</h1>
 
         <p>DevOps Master Student</p>
