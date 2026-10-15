@@ -1,0 +1,44 @@
+---
+- name: Clone application repository
+  ansible.builtin.git:
+    repo: "{{ app_repo }}"
+    dest: "{{ app_dir }}"
+    version: "{{ app_version }}"
+    update: true
+    force: true
+  become: true
+  become_user: "{{ app_user }}"
+  register: app_git_result
+
+- name: Install npm dependencies
+  community.general.npm:
+    path: "{{ app_dir }}"
+    ci: true
+  become: true
+  become_user: "{{ app_user }}"
+  when: app_git_result.changed
+
+- name: Build application
+  ansible.builtin.command:
+    cmd: npm run build
+    chdir: "{{ app_dir }}"
+  become: true
+  become_user: "{{ app_user }}"
+  when: app_git_result.changed
+  changed_when: true
+  notify: restart app
+
+- name: Start application with PM2
+  ansible.builtin.command:
+    cmd: "pm2 start npm --name portfolio -- start -- --port {{ app_port }}"
+    chdir: "{{ app_dir }}"
+  become: true
+  become_user: "{{ app_user }}"
+  environment:
+    HOME: "/home/{{ app_user }}"
+    PM2_HOME: "/home/{{ app_user }}/.pm2"
+  register: pm2_start_result
+  changed_when: "'online' in pm2_start_result.stdout or 'Starting' in pm2_start_result.stdout"
+  failed_when:
+    - pm2_start_result.rc != 0
+    - "'already' not in (pm2_start_result.stderr | default('') | lower)"

@@ -1,0 +1,46 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+  become: true
+
+- name: Deploy portfolio Nginx configuration
+  ansible.builtin.template:
+    src: portfolio.conf.j2
+    dest: /etc/nginx/sites-available/portfolio.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: reload nginx
+
+- name: Enable portfolio site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/portfolio.conf
+    dest: /etc/nginx/sites-enabled/portfolio.conf
+    state: link
+  become: true
+  notify: reload nginx
+
+- name: Remove default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: true
+  notify: reload nginx
+
+- name: Validate Nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  become: true
+  changed_when: false
+
+- name: Ensure Nginx is running and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  become: true
+

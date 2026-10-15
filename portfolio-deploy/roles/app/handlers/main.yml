@@ -1,0 +1,10 @@
+---
+- name: restart app
+  ansible.builtin.command:
+    cmd: pm2 restart portfolio
+  become: true
+  become_user: "{{ app_user }}"
+  environment:
+    HOME: "/home/{{ app_user }}"
+    PM2_HOME: "/home/{{ app_user }}/.pm2"
+  changed_when: true
