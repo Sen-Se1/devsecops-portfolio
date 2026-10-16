@@ -1,5 +1,4 @@
 ---
-# TODO : adapter ces valeurs
 app_repo: "https://github.com/Sen-Se1/devsecops-portfolio.git"
 app_version: "Next-CV-deploy"
 app_dir: "/opt/portfolio"
