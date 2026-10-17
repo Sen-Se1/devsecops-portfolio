@@ -1,0 +1,15 @@
+---
+- name: Installer curl et git sur les serveurs Ubuntu
+  hosts: portfolio_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Installer les paquets curl et git
+      ansible.builtin.apt:
+        name:
+          - curl
+          - git
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
