@@ -8,6 +8,7 @@ La structure se trouve dans `ansible/` :
 ansible/
 ├── ansible.cfg
 ├── inventory.ini
+├── README.md
 └── playbooks/
     ├── install-package.yml
     └── install-docker.yml
@@ -21,14 +22,16 @@ sudo apt install -y ansible openssh-client
 ansible --version
 ```
 
+[Sen-Se1](images/25-install-ansible.png)
+
 ## 26. Configurer l'inventory et tester la communication SSH
 
 Modifiez `inventory.ini` : remplacez l'adresse IP et `ansible_user` par les valeurs réelles de la VM cible. La connexion SSH par clé doit être configurée au préalable. Exemple à adapter :
 
 ```bash
-ssh-copy-id ubuntu@192.168.122.125
-ssh ubuntu@192.168.122.125
-ansible -i inventory.ini portfolio_servers -m ansible.builtin.ping
+ssh-copy-id houssem@192.168.122.125
+ssh houssem@192.168.122.125
+ansible all -m ping
 ```
 
 Résultat attendu si la connexion fonctionne :
@@ -42,18 +45,21 @@ ubuntu-target | SUCCESS => {
 
 Ce résultat est illustratif. Capturez le résultat réel de votre terminal.
 
+[Sen-Se1](images/26-test-ansible-pin.png)
+
 ## 27. Installer curl et git
 
 Depuis le dossier `ansible/` :
 
 ```bash
-ansible-playbook -i inventory.ini playbooks/install-package.yml --ask-become-pass
+ansible-playbook -i inventory.ini playbooks/install-package.yml
 ```
+[Sen-Se1](images/27-install-package.png)
 
 ## 28. Installer Docker sur une VM Ubuntu
 
 ```bash
-ansible-playbook -i inventory.ini playbooks/install-docker.yml --ask-become-pass
+ansible-playbook -i inventory.ini playbooks/install-docker.yml
 ansible -i inventory.ini portfolio_servers -b -m command -a "docker --version"
 ansible -i inventory.ini portfolio_servers -b -m command -a "docker compose version"
 ```
