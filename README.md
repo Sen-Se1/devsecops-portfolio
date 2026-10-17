@@ -252,3 +252,149 @@ PORT=4000
 Developers can use this file as a reference when creating their own local environment configuration.
 
 The `.env.example` file is committed to version control, while `.env.local` is excluded from Git to avoid committing environment-specific settings or sensitive information.
+
+## X. Dockerizing the Frontend and API
+
+### 38. Create the Frontend Dockerfile
+
+A multi-stage Dockerfile was created at the project root to build and run the Next.js frontend in production mode.
+
+The Dockerfile uses Node.js Alpine images to install dependencies, build the application, and run the optimized standalone server. The Next.js configuration includes `output: "standalone"` to generate the production output.
+
+**File: `Dockerfile`**
+
+```dockerfile
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+### 39. Create the API Dockerfile
+
+A separate Dockerfile was created in `api/Dockerfile` to containerize the Express API independently of the frontend.
+
+It installs production dependencies, copies the API source code, and starts the server on port `4000`.
+
+**File: `api/Dockerfile`**
+
+```dockerfile
+FROM node:22-alpine
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+COPY --chown=node:node src ./src
+
+USER node
+ENV PORT=4000
+EXPOSE 4000
+
+CMD ["npm", "start"]
+```
+
+### 40. Build the Docker Images
+
+Two Docker images were built separately for the frontend and the API.
+
+**Build the frontend image:**
+
+```bash
+docker build -t devsecops-portfolio .
+```
+
+**Build the API image:**
+
+```bash
+docker build -t devsecops-api ./api
+```
+
+**List the generated images:**
+
+```bash
+docker images
+```
+
+The expected images are:
+
+- `devsecops-portfolio` — Next.js frontend.
+- `devsecops-api` — Node.js / Express backend.
+
+**Run both containers:**
+
+```bash
+docker network create portfolio-net
+
+docker run -d \
+  --name devsecops-api \
+  --network portfolio-net \
+  -p 4000:4000 \
+  devsecops-api:1
+
+docker run -d \
+  --name devsecops-portfolio \
+  --network portfolio-net \
+  -e API_URL=http://devsecops-api:4000 \
+  -p 3000:3000 \
+  devsecops-portfolio:1
+```
+
+The containers communicate over a shared Docker network. The frontend uses the `API_URL` environment variable to reach the Express API.
+
+**Verification:**
+
+```bash
+docker images
+docker ps
+curl http://localhost:4000/api/health
+curl http://localhost:4000/api/projects
+```
+
+Open `http://localhost:3000` to verify that the frontend loads and retrieves project data from the API.
+
+**Screenshots to include:**
+
+1. Frontend Docker image build and successful completion.
+
+![Front Image](images/36-build-front-image.png)
+
+2. API Docker image build and successful completion.
+
+![API Image](images/37-build-api-image.png)
+
+3. Output of `docker images` showing both required images.
+
+![Docker Images](images/38-docker-images.png)
+
+4. Output of `docker ps` showing both running containers.
+
+![Docker ps](images/39-docker-ps.png)
+
+These screenshots should show the actual results from your terminal.
