@@ -1,7 +1,9 @@
+import { getProjects } from "@/lib/api";
 import Link from "next/link";
-import { projects } from "../data/projects";
 
-export default function Projects() {
+export default async function Projects() {
+  const projects = await getProjects();
+
   return (
     <section id="projects">
       <h2>Projects</h2>
@@ -10,7 +12,6 @@ export default function Projects() {
         {projects.map((project) => (
           <div className="project" key={project.slug}>
             <h3>{project.title}</h3>
-
             <p>{project.description}</p>
 
             <Link

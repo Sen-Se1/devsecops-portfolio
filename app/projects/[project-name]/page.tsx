@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { projects } from "../../../data/projects";
+import { Suspense } from "react";
+import { getProjects } from "@/lib/api";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -8,17 +9,12 @@ type ProjectPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return projects.map((project) => ({ "project-name": project.slug }));
-}
-
-export default async function ProjectPage({
-  params,
-}: ProjectPageProps) {
+async function ProjectDetails({ params }: ProjectPageProps) {
   const { "project-name": projectName } = await params;
+  const projects = await getProjects();
 
   const project = projects.find(
-    (project) => project.slug === projectName
+    (item) => item.slug === projectName
   );
 
   if (!project) {
@@ -26,16 +22,23 @@ export default async function ProjectPage({
   }
 
   return (
+    <section id="project-details">
+      <h2>{project.title}</h2>
+      <p>{project.description}</p>
+
+      <Link href="/projects" className="btn">
+        Back to Projects
+      </Link>
+    </section>
+  );
+}
+
+export default function ProjectPage({ params }: ProjectPageProps) {
+  return (
     <main>
-      <section id="project-details">
-        <h2>{project.title}</h2>
-
-        <p>{project.description}</p>
-
-        <Link href="/projects" className="btn">
-          Back to Projects
-        </Link>
-      </section>
+      <Suspense fallback={<p>Loading project details...</p>}>
+        <ProjectDetails params={params} />
+      </Suspense>
     </main>
   );
 }
