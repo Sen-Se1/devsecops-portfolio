@@ -22,7 +22,7 @@ sudo apt install -y ansible openssh-client
 ansible --version
 ```
 
-[Sen-Se1](images/25-install-ansible.png)
+[Ansible](images/25-install-ansible.png)
 
 ## 26. Configurer l'inventory et tester la communication SSH
 
@@ -45,7 +45,7 @@ ubuntu-target | SUCCESS => {
 
 Ce résultat est illustratif. Capturez le résultat réel de votre terminal.
 
-[Sen-Se1](images/26-test-ansible-pin.png)
+[Ansible](images/26-test-ansible-pin.png)
 
 ## 27. Installer curl et git
 
@@ -54,7 +54,7 @@ Depuis le dossier `ansible/` :
 ```bash
 ansible-playbook -i inventory.ini playbooks/install-package.yml
 ```
-[Sen-Se1](images/27-install-package.png)
+[Ansible](images/27-install-package.png)
 
 ## 28. Installer Docker sur une VM Ubuntu
 
