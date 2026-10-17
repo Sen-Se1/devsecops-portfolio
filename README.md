@@ -24,7 +24,7 @@ sudo apt install -y ansible openssh-client
 ansible --version
 ```
 
-[Install Ansible](images/25-install-ansible.png)
+![Install Ansible](images/25-install-ansible.png)
 
 ### 26. Configure the Inventory and Test SSH Communication
 
@@ -47,7 +47,7 @@ ubuntu-target | SUCCESS => {
 
 This result is illustrative. Capture the actual output from your terminal.
 
-[Test Ansible Ping](images/26-test-ansible-ping.png)
+![Test Ansible Ping](images/26-test-ansible-ping.png)
 
 ### 27. Install curl and git
 
@@ -57,7 +57,7 @@ From the `ansible/` directory:
 ansible-playbook -i inventory.ini playbooks/install-package.yml
 ```
 
-[Install Package](images/27-install-package.png)
+![Install Package](images/27-install-package.png)
 
 ### 28. Install Docker on an Ubuntu VM
 
@@ -67,6 +67,6 @@ ansible -i inventory.ini portfolio_servers -m command -a "docker --version"
 ansible -i inventory.ini portfolio_servers -m command -a "docker compose version"
 ```
 
-[Install Docker](images/28-install-docker.png)
+![Install Docker](images/28-install-docker.png)
 
-The playbook installs `docker.io` and `docker-compose-v2` from the Ubuntu repositories, then enables the service. Verify that these packages are available in the repositories for your Ubuntu version before running the playbook.
+The playbook installs Docker and enables the service. Ensure that the package names in the playbook match the Docker installation method used on your target VM.
