@@ -398,3 +398,93 @@ Open `http://localhost:3000` to verify that the frontend loads and retrieves pro
 ![Docker ps](images/39-docker-ps.png)
 
 These screenshots should show the actual results from your terminal.
+
+### Activity 41 — Docker Compose
+
+#### Objective
+
+Use Docker Compose to build and run the Next.js frontend and Express API together.
+
+#### Docker Compose configuration
+
+The `docker-compose.yml` file is located at the root of the repository. It defines two services:
+
+- **api:** builds the Express API from `./api` and publishes port `4000`.
+- **frontend:** builds the Next.js application from the project root and publishes port `3000`.
+
+The frontend uses `API_URL=http://api:4000` to communicate with the API through the internal Docker Compose network. The `depends_on` option specifies that the API service is started before the frontend service.
+
+#### Start the application
+
+```bash
+docker compose config
+docker compose build
+docker compose up -d
+```
+
+#### Verify running containers
+
+Run the following command:
+
+```bash
+docker compose ps
+```
+
+**Expected result:** both `api` and `frontend` are running, with ports `4000` and `3000` published respectively.
+
+![Docker Compose ps](images/40-docker-compose-ps.png)
+
+#### Stop the application
+
+```bash
+docker compose down
+```
+
+## Activity 42 — Verify Frontend–API Communication
+
+### Objective
+
+Verify that the Next.js frontend communicates successfully with the Express API through the Docker Compose network.
+
+### 1. Docker Network Configuration
+
+The frontend and API services are connected to the same Docker bridge network, `portfolio-net`.
+
+The frontend uses the following environment variable:
+
+```env
+API_URL=http://api:4000
+```
+
+The hostname `api` corresponds to the API service name defined in `docker-compose.yml`. Docker Compose resolves this hostname internally, allowing the frontend container to access the API without using `localhost`.
+
+### 2. Verify API Connectivity
+
+The API health endpoint was tested from inside the frontend container:
+
+```bash
+docker exec devsecops-portfolio node -e \
+"fetch('http://api:4000/api/health').then(async r => { console.log('HTTP:', r.status); console.log(await r.text()); process.exit(r.ok ? 0 : 1) }).catch(e => { console.error(e); process.exit(1) })"
+```
+
+**Expected result:** HTTP status `200` and a successful JSON response from the API.
+
+The API endpoints can also be checked from the host:
+
+```bash
+curl http://localhost:4000/api/health
+curl http://localhost:4000/api/projects
+curl http://localhost:4000/api/skills
+```
+
+### 3. Portfolio Integration Screenshot
+
+The Portfolio displays project and skill information retrieved from the Express API.
+
+![Portfolio displaying API data](images/41-portfolio-api-integration.png)
+
+*Figure 42. Portfolio displaying data provided by the Express API.*
+
+### Result
+
+The frontend and API communicate through the Docker Compose bridge network. The API connectivity test confirms that the frontend container can resolve the `api` service and receive its response. The Portfolio screenshot demonstrates the API data displayed by the frontend.
