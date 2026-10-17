@@ -220,3 +220,35 @@ Capture the portfolio's Skills section in the browser, showing the skills return
 ![Skills API Integration](images/35-skills-integration.png)
 
 **Result:** The Skills section now retrieves its data from the Express API through a reusable function, keeping data access separate from frontend presentation.
+
+## IX. Environment Variables and Configuration
+
+### 36. Configure the API URL
+
+The API URL is configured through the `API_URL` environment variable instead of being hardcoded in the Next.js components.
+
+For local development, `.env.local` contains:
+
+```env
+API_URL=http://localhost:4000
+```
+
+The reusable API functions in `lib/api.ts` read this variable to communicate with the Express backend.
+
+Using an environment variable makes the application easier to configure across development, testing, and production environments without modifying the source code. When Next.js runs inside Docker Compose, the API URL can be set to `http://api:4000` if the Express service is named `api`.
+
+### 37. Create the Environment Example File
+
+A `.env.example` file was created to document the configuration required to run the project. It contains example values and does not include real secrets or credentials.
+
+**File: `.env.example`**
+
+```env
+API_URL=http://localhost:4000
+
+PORT=4000
+```
+
+Developers can use this file as a reference when creating their own local environment configuration.
+
+The `.env.example` file is committed to version control, while `.env.local` is excluded from Git to avoid committing environment-specific settings or sensitive information.
