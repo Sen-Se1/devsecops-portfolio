@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: ["192.168.122.125"],
+  output: "standalone",
 };
 
 export default nextConfig;
