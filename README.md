@@ -85,13 +85,9 @@ devsecops-portfolio/
 │   ├── src/
 │   │   └── server.js
 │   ├── package.json
-│   └── README.md
+├── app/
 ├── components/
-│   ├── Projects.tsx
-│   └── Skills.tsx
 ├── data/
-│   ├── projects.ts
-│   └── skills.ts
 ├── .env.example
 └── README.md
 ```
