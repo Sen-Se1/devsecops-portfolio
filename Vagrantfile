@@ -29,45 +29,43 @@ Vagrant.configure("2") do |config|
   end
 
   # --------------------------------------------------
-  # 4. Configure DNS inside the VM
+  # 4. Configure persistent DNS inside the VM
   # --------------------------------------------------
   config.vm.provision "shell", inline: <<-SHELL
     set -e
 
-    # Create a persistent systemd service for DNS
-    cat > /etc/systemd/system/vagrant-dns.service <<'EOF'
-[Unit]
-Description=Configure DNS for the Vagrant guest
-After=systemd-resolved.service network-online.target
-Wants=network-online.target
+    mkdir -p /etc/systemd/resolved.conf.d
 
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/resolvectl dns eth0 1.1.1.1 8.8.8.8
-ExecStart=/usr/bin/resolvectl domain eth0 ~.
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
+    cat > /etc/systemd/resolved.conf.d/99-vagrant-dns.conf <<'EOF'
+[Resolve]
+DNS=1.1.1.1 8.8.8.8
+FallbackDNS=9.9.9.9
+Domains=~.
+DNSSEC=no
 EOF
 
-    # Enable and start the service
-    systemctl daemon-reload
-    systemctl enable --now vagrant-dns.service
+    # Reload the DNS resolver with the new configuration
+    systemctl restart systemd-resolved
 
-    # Wait for DNS resolution
+    # Explicitly apply DNS servers to the guest interface
+    resolvectl dns eth0 1.1.1.1 8.8.8.8
+    resolvectl domain eth0 '~.'
+
+    # Clear cached DNS results
+    resolvectl flush-caches
+
     echo "Checking DNS resolution..."
 
-    for i in $(seq 1 10); do
+    for i in $(seq 1 15); do
       if getent hosts archive.ubuntu.com >/dev/null 2>&1; then
         echo "DNS resolution is working."
         exit 0
       fi
-
       sleep 2
     done
 
     echo "ERROR: DNS resolution is still failing."
+    resolvectl status
     exit 1
   SHELL
 
