@@ -1,9 +1,7 @@
 ---
-- name: Install required packages
-  ansible.builtin.import_playbook: install-package.yml
+- import_playbook: install-package.yml
 
-- name: Install Docker Engine
-  ansible.builtin.import_playbook: install-docker.yml
+- import_playbook: install-docker.yml
 
 - name: Deploy DevSecOps Portfolio with Docker Compose
   hosts: portfolio_servers
