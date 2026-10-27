@@ -11,6 +11,18 @@ export interface Skill {
   skills: string[];
 }
 
+export interface ContactPayload {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export interface ContactResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
 async function apiRequest<T>(endpoint: string): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
     cache: "no-store",
@@ -35,4 +47,25 @@ export function getSkills(): Promise<Skill[]> {
 
 export function getProfile<T = Record<string, unknown>>(): Promise<T> {
   return apiRequest<T>("/api/profile");
+}
+
+export async function submitContact(
+  payload: ContactPayload
+): Promise<ContactResponse> {
+  const response = await fetch(`${API_URL}/api/contact`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+
+  const result = (await response.json()) as ContactResponse;
+
+  if (!response.ok) {
+    throw new Error(result.error || "Failed to submit contact form.");
+  }
+
+  return result;
 }

@@ -305,3 +305,37 @@ Test the endpoint with `curl` and verify that:
 1. A valid request returns `201 Created`.
 2. An invalid email address returns `400 Bad Request`.
 3. Missing required fields return `400 Bad Request`.
+
+### 47. Connect the Next.js Contact Form to the Express API
+
+**Objective:** Connect the Portfolio's Next.js contact form to the Express API so that user-submitted information is sent to the backend.
+
+#### Implementation
+
+The contact form allows users to enter:
+- Their name.
+- Their email address.
+- Their message.
+
+When the user submits the form, the Next.js frontend sends an HTTP `POST` request to the Express API endpoint `/api/contact`.
+
+API request logic is centralized in `lib/api.ts`, using the `submitContact()` function.
+
+The form handles the API response and displays a success message when the submission succeeds or an error message if the request fails.
+
+#### Verification
+
+1. Start the Next.js frontend and Express backend.
+2. Open the Portfolio in a browser.
+3. Navigate to the Contact section.
+4. Fill in the form fields.
+5. Click **Send Message**.
+6. Verify that a success message appears.
+7. Confirm that the API returns a successful response.
+
+#### Screenshot: Successful Contact Form Submission
+
+Add a screenshot showing the contact form after a successful submission.
+
+![Successful contact form submission](images/44-contact-form-success.png)
+
