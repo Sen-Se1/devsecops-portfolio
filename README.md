@@ -399,3 +399,51 @@ The backend validates the request body before processing the submitted data. If 
 3. Verify that the API returns `400 Bad Request`.
 4. Confirm that the invalid request is rejected and is not processed as a valid contact submission.
 5. Send a valid request to verify that valid data continues to be accepted.
+
+### 49. Implement Centralized API Error Handling
+
+**Objective:** Implement centralized error handling in the Express API to provide consistent error responses and simplify error management across endpoints.
+
+#### Implementation
+
+A centralized error-handling middleware was added to the Express backend.
+
+The implementation includes:
+- A custom `ApiError` class for application errors.
+- A centralized error-handling middleware.
+- A 404 handler for unknown routes.
+- Integration with Zod validation errors.
+- Consistent JSON error responses.
+- Server-side logging for unexpected errors without exposing internal details to clients.
+
+#### Example of an Error Response
+
+**Request:**
+
+`GET /api/unknown`
+
+**HTTP Status:** `404 Not Found`
+
+**Response:**
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Route not found: GET /api/unknown"
+  }
+}
+```
+
+#### Verification
+
+1. Start the Express backend.
+2. Request a nonexistent API endpoint.
+3. Verify that the API returns HTTP `404`.
+4. Submit invalid data to `POST /api/contact`.
+5. Verify that validation errors are handled by the centralized middleware.
+6. Confirm that all error responses follow a consistent JSON structure.
+
+#### Expected Result
+
+The API uses a centralized middleware to handle errors consistently. Invalid requests, unknown routes, and unexpected server errors return appropriate HTTP status codes and structured JSON responses.
