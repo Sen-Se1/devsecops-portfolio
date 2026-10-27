@@ -1,9 +1,20 @@
 FROM node:22-alpine
-ENV NODE_ENV=production
+
 WORKDIR /app
+
+ENV NODE_ENV=production
+
 COPY package*.json ./
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm ci --include=dev
+
 COPY src ./src
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+
+RUN npx prisma generate
+
 USER node
+
 EXPOSE 4000
-CMD ["npm", "start"]
+
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

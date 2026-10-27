@@ -641,6 +641,91 @@ The PostgreSQL service starts successfully, reports a healthy status, accepts lo
 
 At this stage, adding PostgreSQL to Docker Compose does not automatically connect the Express API to the database. Application-level database integration can be implemented separately.
 
+### 54. Persist Contact Form Messages in PostgreSQL
+
+**Objective:** Modify the Express API to store contact form submissions in a PostgreSQL database.
+
+#### Implementation
+
+The Express API was integrated with PostgreSQL using the `pg` Node.js package.
+
+A `contact_messages` table was created with the following columns:
+
+| Column | Description |
+|---|---|
+| `id` | Unique message identifier |
+| `name` | Contact's name |
+| `email` | Contact's email address |
+| `message` | Submitted message |
+| `created_at` | Message creation timestamp |
+
+The contact controller validates incoming data using Zod and inserts valid submissions into PostgreSQL using a parameterized SQL query.
+
+Database connection settings are provided through environment variables. The API returns HTTP `201 Created` when a message is successfully stored and handles database errors through the centralized error middleware.
+
+#### Verification
+
+A test message was submitted to `POST /api/contact`.
+
+The database was queried to verify that the submitted message was stored in the `contact_messages` table.
+
+```sql
+SELECT id, name, email, message, created_at
+FROM contact_messages
+ORDER BY created_at DESC;
+```
+
+#### Database Screenshot
+
+The following screenshot shows the contact messages stored in PostgreSQL after successful form submissions.
+
+![PostgreSQL contact messages](images/48-contact-messages-postgres.png)
+
+#### Expected Result
+
+Contact form submissions are validated by the Express API and persisted in PostgreSQL. Stored messages remain available after the API or database container is restarted, provided the PostgreSQL data volume is retained.
+
+## Database Migrations with Prisma
+
+Prisma Migrate manages database schema changes using versioned SQL migration files.
+
+### Apply migrations
+
+From the `api` directory, execute:
+
+```bash
+npx prisma migrate deploy
+```
+
+This command applies all pending migrations to the configured PostgreSQL database.
+
+### Create a new migration (development)
+
+When the Prisma schema changes, create and apply a migration with:
+
+```bash
+npx prisma migrate dev --name migration_name
+```
+
+Replace `migration_name` with a descriptive name, such as `add_contact_messages`.
+
+### Check migration status
+
+To check whether the database is up to date, run:
+
+```bash
+npx prisma migrate status
+```
+
+### Docker deployment
+
+The API Docker container automatically runs:
+
+```bash
+npx prisma migrate deploy
+```
+
+before starting the application. Migration files are stored in `api/prisma/migrations/` and must be committed to Git.
 
 ## XIV. Application tests
 ## XV. Jenkins : tests et images Docker

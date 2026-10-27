@@ -1,7 +1,8 @@
 const contactSchema = require("../schemas/contactSchema");
 const ApiError = require("../utils/ApiError");
+const prisma = require("../db");
 
-function submitContact(req, res, next) {
+async function submitContact(req, res, next) {
   const result = contactSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -13,12 +14,32 @@ function submitContact(req, res, next) {
     return next(new ApiError(400, "Validation failed", details));
   }
 
-  // TODO: Persist the contact message or send an email.
+  const { name, email, message } = result.data;
 
-  return res.status(201).json({
-    success: true,
-    message: "Contact message received successfully.",
-  });
+  try {
+    const savedMessage = await prisma.contactMessage.create({
+      data: {
+        name,
+        email,
+        message,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Contact message received successfully.",
+      data: savedMessage,
+    });
+  } catch (err) {
+    console.error("Failed to save contact message:", err);
+    return next(new ApiError(500, "Unable to save contact message"));
+  }
 }
 
 module.exports = { submitContact };
