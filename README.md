@@ -122,13 +122,13 @@ Capture the terminal output showing the execution of `vagrant up`, including the
 
 ![Complete Vagrant and Ansible automation](images/43-vagrant-ansible-automation.png)
 
-## Activity 45 — VM Destruction and Automated Redeployment
+### 45. VM Destruction and Automated Redeployment
 
-### Objective
+#### Objective
 
 Verify that the infrastructure is fully automated by destroying the existing Vagrant virtual machine and recreating it from scratch. The Portfolio application must be automatically redeployed without manual configuration.
 
-### 1. Destroy the Existing VM
+#### 1. Destroy the Existing VM
 
 Run the following command:
 
@@ -144,7 +144,7 @@ vagrant status
 
 Expected result: the default virtual machine is reported as `not created`.
 
-### 2. Recreate the VM
+#### 2. Recreate the VM
 
 Run:
 
@@ -164,7 +164,7 @@ The provisioning process includes:
 - Docker image building and container startup.
 - Application availability checks.
 
-### 3. Verify the Deployment
+#### 3. Verify the Deployment
 
 Check the VM status:
 
@@ -196,7 +196,7 @@ Check the API health endpoint:
 vagrant ssh -c "curl http://127.0.0.1:4000/api/health"
 ```
 
-### 4. Expected Results
+#### 4. Expected Results
 
 - The original VM is successfully destroyed.
 - A new VM is created by Vagrant.
@@ -206,7 +206,7 @@ vagrant ssh -c "curl http://127.0.0.1:4000/api/health"
 - The frontend returns an HTTP 200 response.
 - The API health endpoint responds successfully.
 
-### 5. Evidence
+#### 5. Evidence
 
 Add screenshots demonstrating:
 
@@ -217,7 +217,91 @@ Add screenshots demonstrating:
 5. The frontend responding with HTTP 200.
 6. The API health endpoint response.
 
-### Conclusion
+#### Conclusion
 
 This test validates the automated provisioning and redeployment process. The Portfolio can be redeployed on a newly created virtual machine using Vagrant and Ansible, reducing the need for manual configuration.
 
+## XII. API evolution and security
+
+### 46. Implement and Secure the Contact API Endpoint
+
+#### Objective
+
+Implement a `POST /api/contact` endpoint that allows the Portfolio contact form to submit information to the Express backend.
+
+#### Endpoint
+
+| Property | Value |
+|---|---|
+| Method | `POST` |
+| Path | `/api/contact` |
+| Content-Type | `application/json` |
+| Success status | `201 Created` |
+| Validation error | `400 Bad Request` |
+
+#### Request example
+
+```bash
+curl -i -X POST http://localhost:4000/api/contact \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User",
+    "email": "test@example.com",
+    "message": "Hello, I would like to contact you."
+  }'
+```
+
+#### Request body
+
+```json
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "message": "Hello, I would like to contact you."
+}
+```
+
+#### Successful response
+
+**HTTP status:** `201 Created`
+
+```json
+{
+  "success": true,
+  "message": "Contact message received successfully."
+}
+```
+
+#### Validation error example
+
+When the email address is invalid, the API returns `400 Bad Request`.
+
+```json
+{
+  "success": false,
+  "error": "Invalid email address."
+}
+```
+
+#### Security and validation
+
+The endpoint implements the following checks:
+
+- JSON request body size limited to 10 KB.
+- Required fields: `name`, `email`, and `message`.
+- Input type validation.
+- Trimming of leading and trailing whitespace.
+- Email format validation.
+- Maximum field lengths: 100 characters for the name, 254 for the email address, and 5,000 for the message.
+
+#### Current limitations
+
+The endpoint validates and acknowledges contact submissions, but it does not yet persist messages in a database or send email notifications. A database or email integration is required to complete the contact workflow.
+
+#### Verification
+
+Test the endpoint with `curl` and verify that:
+
+1. A valid request returns `201 Created`.
+2. An invalid email address returns `400 Bad Request`.
+3. Missing required fields return `400 Bad Request`.
