@@ -447,3 +447,48 @@ The implementation includes:
 #### Expected Result
 
 The API uses a centralized middleware to handle errors consistently. Invalid requests, unknown routes, and unexpected server errors return appropriate HTTP status codes and structured JSON responses.
+
+### 50. Add Security HTTP Headers with Helmet
+
+**Objective:** Improve the security of the Express API by adding protective HTTP response headers using Helmet.
+
+#### Implementation
+
+Helmet was installed and configured as global middleware in the Express application.
+
+```javascript
+const helmet = require("helmet");
+
+app.use(helmet());
+```
+
+Helmet automatically configures several HTTP security headers to help protect the application against common web vulnerabilities.
+
+#### Verification Using curl
+
+The following command was used to inspect the response headers returned by the API:
+
+```bash
+curl -I http://localhost:4000/api/health
+```
+
+#### Security Headers
+
+The following headers may be present in the response, depending on the Helmet configuration and environment:
+
+- `Content-Security-Policy`
+- `X-Content-Type-Options`
+- `X-Frame-Options`
+- `Referrer-Policy`
+- `Strict-Transport-Security`
+- `Cross-Origin-Opener-Policy`
+
+#### Example Output
+
+![Helmet](images/45-helmet.png)
+
+*Note: This is an illustrative excerpt. Replace it with the actual output obtained from your API.*
+
+#### Expected Result
+
+The Express API returns security-related HTTP headers configured by Helmet. The headers can be inspected using `curl -I`, helping verify that the security middleware is active.

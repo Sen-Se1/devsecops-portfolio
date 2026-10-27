@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 
 const apiRoutes = require("./routes");
 const ApiError = require("./utils/ApiError");
@@ -8,15 +9,10 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
 
+app.use(helmet());
+
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
-
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    message: "API is running",
-  });
-});
 
 app.use("/api", apiRoutes);
 
