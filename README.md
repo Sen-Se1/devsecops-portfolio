@@ -729,7 +729,47 @@ before starting the application. Migration files are stored in `api/prisma/migra
 
 ## XIV. Application tests
 
+### 14. Tests applicatifs — API Express
 
+The API uses Jest and Supertest to test Express routes automatically.
+
+#### Installation
+
+From the `api` directory, install the testing dependencies:
+
+```bash
+npm install --save-dev jest supertest
+```
+
+#### Execute the tests
+
+Run the following commands from the project root:
+
+```bash
+cd api
+npm test
+```
+
+#### Tested route
+
+**Endpoint:** `GET /api/health`
+
+The automated test verifies:
+- The HTTP status code is `200`.
+- The response contains `"status": "ok"`.
+- The response contains `"message": "API is running"`.
+
+#### Successful test results
+
+The test execution completed successfully:
+
+- Test suites: 1 passed.
+- Tests: 1 passed.
+- Snapshots: 0.
+
+#### Screenshot
+
+![Successful Express API tests](images/49-api-tests.png)
 
 ## XV. Jenkins : tests et images Docker
 ## XVI. Pipeline DevSecOps Jenkins
