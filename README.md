@@ -78,7 +78,7 @@ The playbook installs the required packages, configures Docker, and deploys the 
 From the directory containing the `Vagrantfile`, execute:
 
 ```bash
-vagrant up
+vagrant up --provider=libvirt
 ```
 
 If the VM already exists, rerun the provisioning with:

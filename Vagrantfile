@@ -7,6 +7,9 @@ Vagrant.configure("2") do |config|
     v.cpus = 2
   end
 
+  config.vm.network "forwarded_port", guest: 3000, host: 3000, host_ip: "0.0.0.0"
+  config.vm.network "forwarded_port", guest: 4000, host: 4000, host_ip: "0.0.0.0"
+
   # Automatically configure the VM and deploy the portfolio with Ansible
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/playbooks/deploy-portfolio.yml"
