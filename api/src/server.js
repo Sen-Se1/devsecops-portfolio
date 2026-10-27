@@ -7,7 +7,7 @@ const ApiError = require("./utils/ApiError");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
-const PORT = Number(process.env.PORT || 4000);
+const PORT = Number(process.env.API_PORT || 4000);
 
 app.use(helmet());
 

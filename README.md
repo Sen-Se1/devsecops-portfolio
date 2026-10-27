@@ -575,3 +575,73 @@ The API currently includes the following security measures:
 6. Reassess the OWASP risks whenever new endpoints, databases, or third-party integrations are introduced.
 
 **Conclusion:** The API already implements several useful security controls, but these controls do not eliminate every OWASP API Security Top 10 risk. Risks that depend on future functionality should be reassessed when that functionality is introduced.
+
+## XIII. PostgreSQL database
+
+### 53. Add a PostgreSQL Database Service
+
+**Objective:** Add a PostgreSQL database service to the project's Docker Compose configuration and verify that the service starts correctly.
+
+#### Implementation
+
+A PostgreSQL service was added to `docker-compose.yml` with the following configuration:
+
+- **Image:** `postgres:17`
+- **Container name:** `portfolio-postgres`
+- **Database:** `portfolio`
+- **Database user:** `portfolio_user`
+- **Internal port:** `5432`
+- **Persistent storage:** `postgres_data` Docker volume
+- **Restart policy:** `unless-stopped`
+- **Health check:** `pg_isready`
+
+Database credentials are configured through environment variables. The database data is stored in a named Docker volume to preserve it when the container is recreated.
+
+#### Start the Database Service
+
+Run the following commands from the project root:
+
+```bash
+docker compose up -d 
+docker compose ps
+```
+
+#### Example of `docker compose ps` Output
+
+The following output illustrates the expected result when PostgreSQL is running and healthy. Container IDs, port mappings, and status details may differ on the local machine.
+
+![Postgres](images/47-postgres.png)
+
+Replace this illustrative output with the actual output from your environment.
+
+#### Verify Database Readiness
+
+Execute:
+
+```bash
+docker compose exec postgres sh -c \
+  'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+```
+
+Expected result:
+
+```text
+/var/run/postgresql:5432 - accepting connections
+```
+
+#### Persistence
+
+PostgreSQL data is stored in the `postgres_data` named volume mounted at `/var/lib/postgresql/data`.
+
+This volume allows database data to persist when the container is stopped or recreated. Removing the named volume, however, deletes the stored database data.
+
+#### Expected Result
+
+The PostgreSQL service starts successfully, reports a healthy status, accepts local connections from containers on the shared Docker network, and stores its data in a persistent Docker volume.
+
+At this stage, adding PostgreSQL to Docker Compose does not automatically connect the Express API to the database. Application-level database integration can be implemented separately.
+
+
+## XIV. Application tests
+## XV. Jenkins : tests et images Docker
+## XVI. Pipeline DevSecOps Jenkins
