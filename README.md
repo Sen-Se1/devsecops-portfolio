@@ -492,3 +492,86 @@ The following headers may be present in the response, depending on the Helmet co
 #### Expected Result
 
 The Express API returns security-related HTTP headers configured by Helmet. The headers can be inspected using `curl -I`, helping verify that the security middleware is active.
+
+### 51. Implement Rate Limiting for Sensitive API Routes
+
+**Objective:** Protect sensitive API endpoints, especially `POST /api/contact`, against excessive requests and repeated contact form submissions.
+
+#### Implementation
+
+The `express-rate-limit` package was installed and configured as middleware for the contact endpoint.
+
+The rate limiter allows a maximum of five requests per client within a 15-minute window.
+
+When the limit is exceeded, the API returns HTTP `429 Too Many Requests` with a JSON error response.
+
+#### Configuration
+
+- **Protected endpoint:** `POST /api/contact`
+- **Request limit:** 5 requests
+- **Time window:** 15 minutes
+- **Rate-limit response:** `429 Too Many Requests`
+
+#### Example of a Rate-Limit Response
+
+After exceeding the configured request limit, the API returns:
+
+**HTTP Status:** `429 Too Many Requests`
+
+![Rate Limit](images/46-rate-limit.png)
+
+#### Verification
+
+1. Start the Express backend.
+2. Submit five valid requests to `POST /api/contact`.
+3. Send an additional request within the same 15-minute window.
+4. Verify that the additional request receives HTTP `429`.
+5. Confirm that the response contains a JSON error message.
+6. Verify that other API endpoints remain accessible.
+
+#### Expected Result
+
+The contact endpoint limits repeated requests and rejects additional submissions after the configured threshold is reached. This helps reduce automated spam and excessive requests to the contact API.
+
+### 52. OWASP API Security Top 10 Risk Assessment
+
+**Objective:** Review the OWASP API Security Top 10 (2023), identify the risks relevant to the Portfolio API, and document the existing and planned security controls.
+
+#### Risk Assessment
+
+The following table assesses the OWASP API Security Top 10 against the current Express.js API architecture.
+
+| OWASP Risk | Relevance to the Portfolio API | Existing or Planned Mitigation | Status |
+|---|---|---|---|
+| **API1:2023 – Broken Object Level Authorization (BOLA)** | Currently limited because the profile, projects, and skills endpoints return static data without user-specific object access. This risk may become relevant if the API introduces user-owned resources or database records. | Implement object-level authorization checks for every operation involving user-provided resource identifiers. | Planned if resource access is introduced |
+| **API2:2023 – Broken Authentication** | The current public endpoints do not implement authentication. This is acceptable for public portfolio information, but sensitive or administrative endpoints would require protection. | Introduce secure authentication and session or token validation if protected endpoints are added. | Planned if protected endpoints are introduced |
+| **API3:2023 – Broken Object Property Level Authorization** | The contact endpoint accepts user-supplied properties. Unexpected fields are rejected by the strict Zod schema, reducing the risk of mass assignment. | Keep request schemas strict and return only explicitly approved response fields. Review data exposure whenever new endpoints are introduced. | Partially mitigated |
+| **API4:2023 – Unrestricted Resource Consumption** | Excessive requests to the contact endpoint could consume server resources or generate spam. | A rate limiter is configured for `POST /api/contact`, allowing five requests per client within 15 minutes. The JSON body is also limited to 10 KB. Consider broader limits and monitoring for other resource-intensive endpoints. | Partially mitigated |
+| **API5:2023 – Broken Function Level Authorization** | The current API exposes public read-only endpoints and a contact submission endpoint. Administrative or privileged functions are not currently implemented. | Enforce role-based authorization on any future administrative or privileged routes. | Planned if privileged endpoints are introduced |
+| **API6:2023 – Unrestricted Access to Sensitive Business Flows** | Automated abuse of the contact form could generate spam or excessive submissions. | Apply rate limiting to `POST /api/contact`. Consider CAPTCHA or other anti-automation measures if abuse occurs. | Partially mitigated |
+| **API7:2023 – Server Side Request Forgery (SSRF)** | No current endpoint is intended to fetch arbitrary URLs supplied by clients. The risk may arise if URL previews, webhooks, or remote-resource fetching are introduced. | Avoid fetching arbitrary user-provided URLs. If remote fetching is required, validate destinations and block access to internal and cloud metadata addresses. | No direct exposure identified in current routes; reassess when features change |
+| **API8:2023 – Security Misconfiguration** | Incorrect security headers, permissive CORS settings, excessive request sizes, or exposed error details could weaken the API. | Helmet is enabled, the JSON request body is limited to 10 KB, and centralized error handling is implemented. Review CORS configuration and production settings. | Partially mitigated |
+| **API9:2023 – Improper Inventory Management** | Undocumented, obsolete, or accidentally exposed endpoints could increase the attack surface. | Maintain an up-to-date API route inventory and README documentation. Review deployed endpoints and remove unused routes. | Documentation exists; inventory review planned |
+| **API10:2023 – Unsafe Consumption of APIs** | This risk is currently limited because the API does not intentionally consume third-party API responses. It may become relevant if external integrations are added. | Validate external responses, handle failures safely, use HTTPS, and avoid trusting third-party data without verification. | No direct exposure identified in current routes; reassess when integrations are introduced |
+
+#### Existing Security Controls
+
+The API currently includes the following security measures:
+
+- **Helmet:** Adds HTTP security headers.
+- **Zod validation:** Validates contact form fields, enforces length limits, and rejects unexpected properties.
+- **Centralized error handling:** Provides consistent error responses.
+- **Request body limit:** Restricts JSON request bodies to 10 KB.
+- **Rate limiting:** Limits `POST /api/contact` to five requests per client within a 15-minute window.
+- **Route organization:** Separates endpoints into dedicated route modules, making the API easier to review and maintain.
+
+#### Recommended Next Steps
+
+1. Review and restrict CORS to the frontend origins that require access.
+2. Test the contact endpoint's validation and rate-limiting behavior.
+3. Verify that production errors do not expose stack traces or sensitive implementation details.
+4. Introduce authentication and authorization before adding private or administrative functionality.
+5. Maintain an inventory of exposed routes and review dependencies regularly.
+6. Reassess the OWASP risks whenever new endpoints, databases, or third-party integrations are introduced.
+
+**Conclusion:** The API already implements several useful security controls, but these controls do not eliminate every OWASP API Security Top 10 risk. Risks that depend on future functionality should be reassessed when that functionality is introduced.
