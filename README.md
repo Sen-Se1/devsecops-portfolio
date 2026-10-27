@@ -120,12 +120,4 @@ Open the portfolio in a browser:
 
 Capture the terminal output showing the execution of `vagrant up`, including the successful Ansible provisioning and deployment tasks.
 
-Save the screenshot as:
-
-`images/44-vagrant-ansible-automation.png`
-
-Add the screenshot to this README:
-
 ![Complete Vagrant and Ansible automation](images/43-vagrant-ansible-automation.png)
-
-**Result:** Vagrant and Ansible work together to automate VM provisioning, Docker installation, and portfolio deployment. The goal is to launch the complete workflow using a single `vagrant up` command.
