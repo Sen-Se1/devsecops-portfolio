@@ -488,3 +488,4 @@ The Portfolio displays project and skill information retrieved from the Express 
 ### Result
 
 The frontend and API communicate through the Docker Compose bridge network. The API connectivity test confirms that the frontend container can resolve the `api` service and receive its response. The Portfolio screenshot demonstrates the API data displayed by the frontend.
+ 
