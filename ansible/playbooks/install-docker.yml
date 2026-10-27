@@ -1,11 +1,61 @@
 ---
-- name: Installer Docker Engine depuis le depot officiel
+- name: Install Docker Engine from the official repository
   hosts: portfolio_servers
   become: true
   gather_facts: true
 
   tasks:
-    - name: Installer Docker CE et le plugin Compose
+    - name: Install required dependencies
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Create the APT keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Download the official Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+        force: true
+
+    - name: Detect the Ubuntu codename
+      ansible.builtin.command:
+        argv:
+          - bash
+          - -c
+          - 'source /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}"'
+      register: ubuntu_codename
+      changed_when: false
+
+    - name: Detect the system architecture
+      ansible.builtin.command:
+        argv:
+          - dpkg
+          - --print-architecture
+      register: system_architecture
+      changed_when: false
+
+    - name: Add the official Docker repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ system_architecture.stdout }}
+          signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu
+          {{ ubuntu_codename.stdout }} stable
+        filename: docker
+        state: present
+        update_cache: true
+
+    - name: Install Docker Engine and Docker Compose
       ansible.builtin.apt:
         name:
           - docker-ce
@@ -17,26 +67,31 @@
         update_cache: true
         cache_valid_time: 3600
 
-    - name: Activer et demarrer le service Docker
-      ansible.builtin.service:
+    - name: Enable and start Docker
+      ansible.builtin.systemd:
         name: docker
-        state: started
         enabled: true
+        state: started
 
-    - name: Verifier la version Docker
-      ansible.builtin.command: docker --version
+    - name: Verify the Docker version
+      ansible.builtin.command:
+        argv:
+          - docker
+          - --version
       register: docker_version
       changed_when: false
 
-    - name: Afficher la version Docker
-      ansible.builtin.debug:
-        var: docker_version.stdout
-
-    - name: Verifier la version Docker Compose
-      ansible.builtin.command: docker compose version
+    - name: Verify the Docker Compose version
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - version
       register: compose_version
       changed_when: false
 
-    - name: Afficher la version Docker Compose
+    - name: Display the installed versions
       ansible.builtin.debug:
-        var: compose_version.stdout
+        msg:
+          - "{{ docker_version.stdout }}"
+          - "{{ compose_version.stdout }}"
