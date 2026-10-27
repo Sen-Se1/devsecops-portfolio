@@ -34,7 +34,10 @@ async function submitContact(req, res, next) {
     return res.status(201).json({
       success: true,
       message: "Contact message received successfully.",
-      data: savedMessage,
+      data: {
+        ...savedMessage,
+        id: savedMessage.id.toString(),
+      },
     });
   } catch (err) {
     console.error("Failed to save contact message:", err);

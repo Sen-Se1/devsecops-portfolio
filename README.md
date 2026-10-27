@@ -812,5 +812,72 @@ Après exécution, les résultats doivent être reportés à partir de la sortie
 
 ![Successful Express API tests](images/50-api-tests.png)
 
+## Activity 60 — Frontend → API → PostgreSQL Integration Tests
+
+### Objective
+
+Verify the contact form submission workflow, from the frontend to the API and PostgreSQL database.
+
+### Tested Architecture
+
+1. The `components/Contact.tsx` component collects the contact form data.
+2. The `submitContact()` function in `lib/api.ts` sends an HTTP `POST /api/contact` request.
+3. The Express API validates the submitted data using Zod.
+4. The `contactController.js` controller uses Prisma to store the message.
+5. PostgreSQL saves the message in the `contact_messages` table.
+
+### Test Scenarios
+
+- **Valid contact submission:** Expect HTTP `201` and verify that the message is stored in PostgreSQL.
+- **Invalid email submission:** Expect HTTP `400` and verify that no database record is created.
+- **API health and security tests:** Run the existing automated tests to verify API availability and error handling.
+
+### Commands Used
+
+Check the running Docker services:
+
+```bash
+docker compose ps
+docker network ls
+```
+
+Create a dedicated test database:
+
+```bash
+docker compose exec postgres sh -c \
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "CREATE DATABASE portfolio_test OWNER $POSTGRES_USER;"'
+```
+
+Build the test image:
+
+```bash
+docker build -f api/Dockerfile.test -t devsecops-api-test ./api
+```
+
+Run database migrations and automated tests. Replace `NOM_DU_RESEAU` with the actual Docker network name:
+
+```bash
+docker run --rm \
+  --network NOM_DU_RESEAU \
+  -e DATABASE_URL='postgresql://portfolio_user:portfolio_pass@postgres:5432/portfolio_test?schema=public' \
+  devsecops-api-test \
+  sh -c 'npx prisma migrate deploy && npm test'
+```
+
+> If your PostgreSQL credentials differ from the defaults in `docker-compose.yml`, update the connection string accordingly. Do not commit database passwords to the repository.
+
+### Test Results
+
+Complete this section after running the tests:
+
+- **Passed tests:** To be confirmed.
+- **Failed tests:** To be confirmed.
+- **Database persistence verification:** To be confirmed.
+- **Browser-based frontend integration test:** To be confirmed.
+
+### Test Execution Screenshot
+
+![Integration test results](images/51-api-integration-tests.png)
+
 ## XV. Jenkins : tests et images Docker
 ## XVI. Pipeline DevSecOps Jenkins
