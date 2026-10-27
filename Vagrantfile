@@ -5,18 +5,13 @@ Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu2204"
   config.vm.hostname = "ubuntu-target"
 
+  config.vm.network "private_network", ip: "192.168.122.10"
+
   # --------------------------------------------------
   # 2. Port Forwarding
   # --------------------------------------------------
-  # Frontend: Next.js
-  config.vm.network "forwarded_port",
-    guest: 3000,
-    host: 3000,
-
-  # Backend: Express API
-  config.vm.network "forwarded_port",
-    guest: 4000,
-    host: 4000
+  config.vm.network "forwarded_port", guest: 3000, host: 3000
+  config.vm.network "forwarded_port", guest: 4000, host: 4000
 
   # --------------------------------------------------
   # 3. Libvirt Provider
