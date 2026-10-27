@@ -1,9 +1,6 @@
 Vagrant.configure("2") do |config|
-
   config.vm.box = "generic/ubuntu2204"
   config.vm.hostname = "ubuntu-target"
-
-  config.vm.network "private_network", ip: "192.168.122.125"
 
   config.vm.provider "libvirt" do |v|
     v.memory = 4096
@@ -22,5 +19,4 @@ Vagrant.configure("2") do |config|
     ansible.become = true
     ansible.verbose = "v"
   end
-
 end
