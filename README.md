@@ -339,3 +339,63 @@ Add a screenshot showing the contact form after a successful submission.
 
 ![Successful contact form submission](images/44-contact-form-success.png)
 
+### 48. Validate API Input Using Zod
+
+**Objective:** Implement strict validation of incoming API data using Zod to ensure that invalid requests are rejected by the backend.
+
+#### Implementation
+
+Zod is used to define a validation schema for the `POST /api/contact` endpoint.
+
+The schema validates the following fields:
+- **Name:** Required, non-empty string.
+- **Email:** Required, valid email address.
+- **Message:** Required, non-empty string.
+
+The backend validates the request body before processing the submitted data. If the data does not match the schema, the API rejects the request and returns an appropriate HTTP error response.
+
+#### Example of a Rejected Request
+
+**Endpoint:** `POST /api/contact`
+
+**Request body:**
+```json
+{
+  "name": "",
+  "email": "invalid-email",
+  "message": ""
+}
+```
+
+**Expected response:**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "name",
+      "message": "Name is required"
+    },
+    {
+      "field": "email",
+      "message": "Invalid email address"
+    },
+    {
+      "field": "message",
+      "message": "Message is required"
+    }
+  ]
+}
+```
+
+**Expected HTTP status:** `400 Bad Request`
+
+*Note: The response structure and validation messages above are examples. Your actual response must match the implementation in your Express API.*
+
+#### Verification
+
+1. Start the Express backend.
+2. Send a `POST` request to `/api/contact` with invalid data.
+3. Verify that the API returns `400 Bad Request`.
+4. Confirm that the invalid request is rejected and is not processed as a valid contact submission.
+5. Send a valid request to verify that valid data continues to be accepted.

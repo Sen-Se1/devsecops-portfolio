@@ -1,11 +1,35 @@
 const express = require("express");
 const cors = require("cors");
+const { z } = require("zod");
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
 
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
+
+const contactSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Name is required")
+      .max(100, "Name must not exceed 100 characters"),
+
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email is required")
+      .max(254, "Email must not exceed 254 characters")
+      .email("Invalid email address"),
+
+    message: z
+      .string()
+      .trim()
+      .min(1, "Message is required")
+      .max(5000, "Message must not exceed 5000 characters"),
+  })
+  .strict();
 
 const profile = {
   name: "Houssem",
@@ -66,52 +90,29 @@ app.get("/api/projects", (_req, res) => res.json(projects));
 app.get("/api/skills", (_req, res) => res.json(skills));
 
 app.post("/api/contact", (req, res) => {
-  const { name, email, message } = req.body ?? {};
+  const result = contactSchema.safeParse(req.body);
 
-  if (
-    typeof name !== "string" ||
-    typeof email !== "string" ||
-    typeof message !== "string"
-  ) {
+  if (!result.success) {
     return res.status(400).json({
       success: false,
-      error: "Name, email and message are required.",
+      error: "Validation failed",
+      details: result.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      })),
     });
   }
 
-  const cleanName = name.trim();
-  const cleanEmail = email.trim();
-  const cleanMessage = message.trim();
+  const { name, email, message } = result.data;
 
-  if (!cleanName || !cleanEmail || !cleanMessage) {
-    return res.status(400).json({
-      success: false,
-      error: "All fields are required.",
-    });
-  }
+  // TODO: Save the message to a database
+  // or send an email to the Portfolio owner.
 
-  if (
-    cleanName.length > 100 ||
-    cleanEmail.length > 254 ||
-    cleanMessage.length > 5000
-  ) {
-    return res.status(400).json({
-      success: false,
-      error: "One or more fields exceed the allowed length.",
-    });
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!emailRegex.test(cleanEmail)) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid email address.",
-    });
-  }
-
-  // TODO: enregistrer le message en base de données
-  // ou envoyer un e-mail au propriétaire du Portfolio.
+  console.log("Valid contact submission received:", {
+    name,
+    email,
+    messageLength: message.length,
+  });
 
   return res.status(201).json({
     success: true,
