@@ -12,13 +12,11 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port",
     guest: 3000,
     host: 3000,
-    host_ip: "127.0.0.1"
 
   # Backend: Express API
   config.vm.network "forwarded_port",
     guest: 4000,
-    host: 4000,
-    host_ip: "127.0.0.1"
+    host: 4000
 
   # --------------------------------------------------
   # 3. Libvirt Provider
