@@ -771,5 +771,46 @@ The test execution completed successfully:
 
 ![Successful Express API tests](images/49-api-tests.png)
 
+### 15. Tests automatisés de sécurité de l'API
+
+#### Objectif
+
+Des tests automatisés avec Jest et Supertest permettent de vérifier le comportement de l'API Express face à différentes requêtes invalides ou potentiellement malveillantes.
+
+#### Scénarios testés
+
+- **Route inexistante :** vérification du code HTTP `404`.
+- **JSON malformé :** vérification du rejet de la requête avec le code HTTP `400`.
+- **Entrée de type injection SQL :** vérification que la route de santé reste fonctionnelle.
+- **Entrée très longue :** vérification que la requête ne provoque pas de plantage.
+- **Corps JSON trop volumineux :** vérification du rejet avec le code HTTP `413`.
+
+#### Commandes utilisées
+
+Depuis le répertoire du projet :
+
+```bash
+cd api
+npm test
+```
+
+#### Résultats des tests
+
+Après exécution, les résultats doivent être reportés à partir de la sortie réelle de Jest.
+
+| Vérification | Résultat attendu |
+|---|---|
+| Route inconnue | PASS — HTTP 404 |
+| JSON malformé | PASS — HTTP 400 |
+| Entrée de type injection | PASS — réponse contrôlée |
+| Entrée très longue | PASS — pas de plantage |
+| Corps JSON trop volumineux | PASS — HTTP 413 |
+
+**Résultat réel :** à compléter après l'exécution de `npm test`.
+
+#### Screenshot
+
+![Successful Express API tests](images/50-api-tests.png)
+
 ## XV. Jenkins : tests et images Docker
 ## XVI. Pipeline DevSecOps Jenkins
