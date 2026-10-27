@@ -121,3 +121,103 @@ Open the portfolio in a browser:
 Capture the terminal output showing the execution of `vagrant up`, including the successful Ansible provisioning and deployment tasks.
 
 ![Complete Vagrant and Ansible automation](images/43-vagrant-ansible-automation.png)
+
+## Activity 45 — VM Destruction and Automated Redeployment
+
+### Objective
+
+Verify that the infrastructure is fully automated by destroying the existing Vagrant virtual machine and recreating it from scratch. The Portfolio application must be automatically redeployed without manual configuration.
+
+### 1. Destroy the Existing VM
+
+Run the following command:
+
+```bash
+vagrant destroy -f
+```
+
+Verify that the virtual machine has been removed:
+
+```bash
+vagrant status
+```
+
+Expected result: the default virtual machine is reported as `not created`.
+
+### 2. Recreate the VM
+
+Run:
+
+```bash
+vagrant up --provider=libvirt
+```
+
+Vagrant recreates the Ubuntu virtual machine and automatically runs the configured provisioning steps.
+
+The provisioning process includes:
+
+- DNS configuration.
+- Ansible execution.
+- Installation of required packages.
+- Docker Engine and Docker Compose installation.
+- Portfolio repository deployment.
+- Docker image building and container startup.
+- Application availability checks.
+
+### 3. Verify the Deployment
+
+Check the VM status:
+
+```bash
+vagrant status
+```
+
+Check the installed Docker version:
+
+```bash
+vagrant ssh -c "docker --version"
+```
+
+Check the application containers:
+
+```bash
+vagrant ssh -c "docker compose -f /opt/devsecops-portfolio/docker-compose.yml ps"
+```
+
+Check the frontend HTTP response:
+
+```bash
+vagrant ssh -c "curl -I http://127.0.0.1:3000"
+```
+
+Check the API health endpoint:
+
+```bash
+vagrant ssh -c "curl http://127.0.0.1:4000/api/health"
+```
+
+### 4. Expected Results
+
+- The original VM is successfully destroyed.
+- A new VM is created by Vagrant.
+- Ansible automatically configures the new VM.
+- Docker and Docker Compose are installed.
+- The Portfolio containers start successfully.
+- The frontend returns an HTTP 200 response.
+- The API health endpoint responds successfully.
+
+### 5. Evidence
+
+Add screenshots demonstrating:
+
+1. The successful execution of `vagrant destroy -f`.
+2. The successful execution of `vagrant up --provider=libvirt`.
+3. The Ansible provisioning recap showing `failed=0`.
+4. The running Docker containers.
+5. The frontend responding with HTTP 200.
+6. The API health endpoint response.
+
+### Conclusion
+
+This test validates the automated provisioning and redeployment process. The Portfolio can be redeployed on a newly created virtual machine using Vagrant and Ansible, reducing the need for manual configuration.
+
