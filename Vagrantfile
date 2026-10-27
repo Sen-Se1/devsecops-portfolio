@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "ugeneric/ubuntu2204"
+  config.vm.box = "generic/ubuntu2204"
   config.vm.hostname = "ubuntu-target"
 
   config.vm.network "private_network", ip: "192.168.122.125"
