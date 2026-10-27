@@ -1,0 +1,65 @@
+---
+- name: Install required packages
+  ansible.builtin.import_playbook: install-package.yml
+
+- name: Install Docker Engine
+  ansible.builtin.import_playbook: install-docker.yml
+
+- name: Deploy DevSecOps Portfolio with Docker Compose
+  hosts: portfolio_servers
+  become: true
+  gather_facts: true
+
+  vars:
+    portfolio_repo: "https://github.com/Sen-Se1/devsecops-portfolio.git"
+    portfolio_branch: "Activite-4"
+    portfolio_dir: "/opt/devsecops-portfolio"
+
+  tasks:
+    - name: Clone the DevSecOps Portfolio repository
+      ansible.builtin.git:
+        repo: "{{ portfolio_repo }}"
+        dest: "{{ portfolio_dir }}"
+        version: "{{ portfolio_branch }}"
+        update: true
+        force: false
+
+    - name: Build and deploy the frontend and API
+      ansible.builtin.command:
+        cmd: docker compose up -d --build
+        chdir: "{{ portfolio_dir }}"
+      register: compose_deploy
+      changed_when: true
+
+    - name: Wait for the frontend to become available
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 3000
+        delay: 5
+        timeout: 180
+        state: started
+
+    - name: Verify the frontend HTTP response
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:3000"
+        method: GET
+        status_code: 200
+      register: frontend_response
+      retries: 10
+      delay: 5
+      until: frontend_response.status == 200
+
+    - name: Display the Docker Compose status
+      ansible.builtin.command:
+        cmd: docker compose ps
+        chdir: "{{ portfolio_dir }}"
+      register: compose_status
+      changed_when: false
+
+    - name: Display deployment results
+      ansible.builtin.debug:
+        msg:
+          - "Portfolio deployment completed."
+          - "Frontend URL: http://192.168.122.125:3000"
+          - "HTTP status: {{ frontend_response.status }}"
+          - "{{ compose_status.stdout }}"
