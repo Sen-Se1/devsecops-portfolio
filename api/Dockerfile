@@ -11,7 +11,7 @@ COPY src ./src
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://user:password@localhost:5432/db" npx prisma generate
 
 USER node
 

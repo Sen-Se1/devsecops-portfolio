@@ -685,11 +685,11 @@ The following screenshot shows the contact messages stored in PostgreSQL after s
 
 Contact form submissions are validated by the Express API and persisted in PostgreSQL. Stored messages remain available after the API or database container is restarted, provided the PostgreSQL data volume is retained.
 
-## Database Migrations with Prisma
+### 55. Database Migrations with Prisma
 
 Prisma Migrate manages database schema changes using versioned SQL migration files.
 
-### Apply migrations
+#### Apply migrations
 
 From the `api` directory, execute:
 
@@ -699,7 +699,7 @@ npx prisma migrate deploy
 
 This command applies all pending migrations to the configured PostgreSQL database.
 
-### Create a new migration (development)
+#### Create a new migration (development)
 
 When the Prisma schema changes, create and apply a migration with:
 
@@ -709,7 +709,7 @@ npx prisma migrate dev --name migration_name
 
 Replace `migration_name` with a descriptive name, such as `add_contact_messages`.
 
-### Check migration status
+#### Check migration status
 
 To check whether the database is up to date, run:
 
@@ -717,7 +717,7 @@ To check whether the database is up to date, run:
 npx prisma migrate status
 ```
 
-### Docker deployment
+#### Docker deployment
 
 The API Docker container automatically runs:
 
@@ -728,5 +728,8 @@ npx prisma migrate deploy
 before starting the application. Migration files are stored in `api/prisma/migrations/` and must be committed to Git.
 
 ## XIV. Application tests
+
+
+
 ## XV. Jenkins : tests et images Docker
 ## XVI. Pipeline DevSecOps Jenkins
