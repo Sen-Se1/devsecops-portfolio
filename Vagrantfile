@@ -5,8 +5,6 @@ Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu2204"
   config.vm.hostname = "ubuntu-target"
 
-  config.vm.network "private_network", ip: "192.168.122.10"
-
   # --------------------------------------------------
   # 2. Port Forwarding
   # --------------------------------------------------
