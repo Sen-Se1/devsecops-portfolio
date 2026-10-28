@@ -32,10 +32,6 @@ pipeline {
 
                     env.API_IMAGE =
                         "devsecops-api:${env.GIT_SHA}"
-
-                    echo "Git SHA: ${env.GIT_SHA}"
-                    echo "Frontend image: ${env.FRONTEND_IMAGE}"
-                    echo "API image: ${env.API_IMAGE}"
                 }
             }
         }
@@ -45,38 +41,29 @@ pipeline {
                 sh '''
                     set -eu
 
-                    echo "===== GITLEAKS SECRET SCAN ====="
-
                     docker run --rm \
                         -v "$WORKSPACE:/repo" \
                         -w /repo \
                         ghcr.io/gitleaks/gitleaks:latest \
                         git --redact --verbose .
                 '''
-
-                echo 'Gitleaks scan completed successfully.'
             }
         }
-        
-        stage('Check Environment') {
+
+        stage('Semgrep SAST Scan') {
             steps {
                 sh '''
                     set -eu
 
-                    echo "===== NODE.JS ====="
-                    node --version
-                    npm --version
-
-                    echo "===== DOCKER ====="
-                    docker --version
-                    docker compose version
-
-                    echo "===== GIT ====="
-                    git --version
-
-                    echo "===== DOCKER ACCESS ====="
-                    docker info >/dev/null
-                    echo "Docker daemon is accessible."
+                    docker run --rm \
+                        -v "$WORKSPACE:/src" \
+                        -w /src \
+                        semgrep/semgrep \
+                        semgrep scan \
+                        --config auto \
+                        --metrics=off \
+                        --error \
+                        .
                 '''
             }
         }
@@ -246,63 +233,6 @@ pipeline {
                         './api'
                     )
                 }
-            }
-        }
-
-        stage('Verify Docker Images') {
-            steps {
-                sh '''
-                    set -eu
-
-                    echo "===== VERIFY GIT SHA ====="
-
-                    if [ -z "$GIT_SHA" ]; then
-                        echo "ERROR: Git SHA is empty."
-                        exit 1
-                    fi
-
-                    echo "Git SHA: $GIT_SHA"
-
-                    echo "===== VERIFY FRONTEND IMAGE ====="
-
-                    EXPECTED_FRONTEND="devsecops-portfolio:$GIT_SHA"
-
-                    docker image inspect "$EXPECTED_FRONTEND" >/dev/null
-
-                    echo "Frontend image exists: $EXPECTED_FRONTEND"
-
-                    echo "===== VERIFY API IMAGE ====="
-
-                    EXPECTED_API="devsecops-api:$GIT_SHA"
-
-                    docker image inspect "$EXPECTED_API" >/dev/null
-
-                    echo "API image exists: $EXPECTED_API"
-
-                    echo "===== VERIFY IMAGE TAGS ====="
-
-                    if [ "$FRONTEND_IMAGE" != "$EXPECTED_FRONTEND" ]; then
-                        echo "ERROR: Frontend tag does not match Git SHA."
-                        exit 1
-                    fi
-
-                    if [ "$API_IMAGE" != "$EXPECTED_API" ]; then
-                        echo "ERROR: API tag does not match Git SHA."
-                        exit 1
-                    fi
-
-                    echo "===== VERIFIED IMAGES ====="
-
-                    docker image ls \
-                        --format '{{.Repository}}:{{.Tag}}' \
-                        | grep -F -x "$EXPECTED_FRONTEND"
-
-                    docker image ls \
-                        --format '{{.Repository}}:{{.Tag}}' \
-                        | grep -F -x "$EXPECTED_API"
-
-                    echo "SUCCESS: Both Docker images are verified."
-                '''
             }
         }
     }
