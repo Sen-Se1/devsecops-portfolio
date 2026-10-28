@@ -120,7 +120,6 @@ pipeline {
             }
         }
 
-
         stage('Install Frontend Dependencies') {
             steps {
                 sh 'npm ci'
@@ -307,6 +306,34 @@ pipeline {
                     docker images \
                         --filter "reference=devsecops-portfolio:${GIT_SHA}" \
                         --filter "reference=devsecops-api:${GIT_SHA}"
+                '''
+            }
+        }
+
+        stage('Trivy Docker Image Scan') {
+            steps {
+                sh '''
+                    set -eu
+
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy:latest \
+                        image \
+                        --scanners vuln \
+                        --severity HIGH,CRITICAL \
+                        --exit-code 1 \
+                        --format table \
+                        "$FRONTEND_IMAGE"
+
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy:latest \
+                        image \
+                        --scanners vuln \
+                        --severity HIGH,CRITICAL \
+                        --exit-code 1 \
+                        --format table \
+                        "$API_IMAGE"
                 '''
             }
         }
