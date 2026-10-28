@@ -40,6 +40,24 @@ pipeline {
             }
         }
 
+        stage('Gitleaks Secret Scan') {
+            steps {
+                sh '''
+                    set -eu
+
+                    echo "===== GITLEAKS SECRET SCAN ====="
+
+                    docker run --rm \
+                        -v "$WORKSPACE:/repo" \
+                        -w /repo \
+                        ghcr.io/gitleaks/gitleaks:latest \
+                        git --redact --verbose .
+                '''
+
+                echo 'Gitleaks scan completed successfully.'
+            }
+        }
+        
         stage('Check Environment') {
             steps {
                 sh '''
