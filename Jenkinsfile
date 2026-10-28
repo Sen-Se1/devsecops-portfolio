@@ -40,7 +40,7 @@ pipeline {
                 sh '''
                     set -eu
 
-                    echo "Checking Docker availability..."
+                    echo "Checking Docker..."
                     docker --version
                     docker compose version
 
@@ -48,32 +48,48 @@ pipeline {
                     docker compose up -d postgres
 
                     echo "Waiting for PostgreSQL..."
+                    ready=false
+
                     for i in $(seq 1 30); do
                         if docker compose exec -T postgres pg_isready; then
+                            ready=true
                             break
-                        fi
-                        if [ "$i" -eq 30 ]; then
-                            echo "PostgreSQL did not become ready."
-                            exit 1
                         fi
                         sleep 2
                     done
 
-                    echo "Creating test database if needed..."
+                    if [ "$ready" != "true" ]; then
+                        echo "ERROR: PostgreSQL is not ready."
+                        exit 1
+                    fi
+
+                    echo "Ensuring the test database exists..."
                     docker compose exec -T postgres sh -c '
-                        psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-                            -tAc "SELECT 1 FROM pg_database WHERE datname = '\''portfolio_test'\''" \
-                            | grep -q 1 ||
-                        psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-                            -c "CREATE DATABASE portfolio_test OWNER $POSTGRES_USER;"
+                        if ! psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+                            -tAc "SELECT 1 FROM pg_database WHERE datname = '\\''portfolio_test'\\''" \
+                            | grep -q 1; then
+                            psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+                                -c "CREATE DATABASE portfolio_test OWNER $POSTGRES_USER;"
+                        fi
                     '
 
-                    echo "Building API test image..."
-                    docker build -f api/Dockerfile.test -t devsecops-api-test:latest ./api
+                    echo "Building the API test image..."
+                    docker build \
+                        -f api/Dockerfile.test \
+                        -t devsecops-api-test:latest \
+                        ./api
 
-                    echo "Running API integration tests..."
-                    NETWORK=$(docker inspect devsecops-api --format '{{range $name, $value := .NetworkSettings.Networks}}{{$name}}{{end}}')
+                    echo "Finding the Compose network..."
+                    NETWORK=$(docker inspect \
+                        "$(docker compose ps -q postgres)" \
+                        --format '{{range $name, $value := .NetworkSettings.Networks}}{{$name}}{{end}}')
 
+                    if [ -z "$NETWORK" ]; then
+                        echo "ERROR: Could not determine the PostgreSQL Docker network."
+                        exit 1
+                    fi
+
+                    echo "Running API tests..."
                     docker run --rm \
                         --network "$NETWORK" \
                         -e DATABASE_URL="postgresql://portfolio_user:portfolio_pass@postgres:5432/portfolio_test?schema=public" \
@@ -82,7 +98,7 @@ pipeline {
                 '''
             }
         }
-
+        
         stage('Build Next.js') {
             steps {
                 sh 'npm run build'
