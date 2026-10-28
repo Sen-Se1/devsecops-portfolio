@@ -88,7 +88,7 @@ pipeline {
 
                             npm audit --omit=dev --json > npm-audit-frontend.json || true
 
-                            npm audit --omit=dev --audit-level="$NPM_AUDIT_LEVEL"
+                            node ci/npm-audit-gate.js "$NPM_AUDIT_LEVEL" < npm-audit-frontend.json
                         '''
                     }
                 }
@@ -101,7 +101,7 @@ pipeline {
 
                                 npm audit --omit=dev --json > npm-audit-api.json || true
 
-                                npm audit --omit=dev --audit-level="$NPM_AUDIT_LEVEL"
+                                node ../ci/npm-audit-gate.js "$NPM_AUDIT_LEVEL" < npm-audit-api.json
                             '''
                         }
                     }
