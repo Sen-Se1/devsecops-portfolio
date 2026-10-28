@@ -58,9 +58,9 @@ pipeline {
                     docker run --rm \
                         -v "$WORKSPACE:/src" \
                         -w /src \
-                        semgrep/semgrep \
+                        semgrep/semgrep:latest \
                         semgrep scan \
-                        --config auto \
+                        --config p/default \
                         --metrics=off \
                         --error \
                         .
