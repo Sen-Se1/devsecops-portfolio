@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    
+    tools {
+        nodejs 'NodeJS-22'
+    }
 
     environment {
         FRONTEND_IMAGE = 'devsecops-portfolio:latest'
@@ -98,7 +102,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Build Next.js') {
             steps {
                 sh 'npm run build'
