@@ -148,9 +148,11 @@ pipeline {
                         --network "$NETWORK" \
                         --user "$(id -u):$(id -g)" \
                         -e DATABASE_URL="postgresql://${DB_USER}:portfolio_pass@postgres:5432/${TEST_DATABASE}?schema=public" \
+                        -e JEST_JUNIT_OUTPUT_DIR=/app/test-results \
+                        -e JEST_JUNIT_OUTPUT_NAME=junit.xml \
                         -v "$WORKSPACE/api/test-results:/app/test-results" \
                         "$API_TEST_IMAGE" \
-                        sh -c 'mkdir -p /app/test-results && npx prisma migrate deploy && npm test -- --reporters=default --reporters=jest-junit'
+                        sh -c 'npx prisma migrate deploy && npm test -- --reporters=default --reporters=jest-junit'
                 '''
             }
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="8" failures="0" errors="0" time="0.603">
+  <testsuite name="Integration: API -&gt; PostgreSQL" errors="0" failures="0" skipped="0" timestamp="2026-10-28T17:07:20" time="0.338" tests="2">
+    <testcase classname="Integration: API -&gt; PostgreSQL POST /api/contact saves a valid message in PostgreSQL" name="Integration: API -&gt; PostgreSQL POST /api/contact saves a valid message in PostgreSQL" time="0.101">
+    </testcase>
+    <testcase classname="Integration: API -&gt; PostgreSQL POST /api/contact rejects invalid email without inserting a row" name="Integration: API -&gt; PostgreSQL POST /api/contact rejects invalid email without inserting a row" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="API security tests" errors="0" failures="0" skipped="0" timestamp="2026-10-28T17:07:21" time="0.091" tests="5">
+    <testcase classname="API security tests GET /api/unknown should return 404" name="API security tests GET /api/unknown should return 404" time="0.004">
+    </testcase>
+    <testcase classname="API security tests POST with malformed JSON should return 400" name="API security tests POST with malformed JSON should return 400" time="0.006">
+    </testcase>
+    <testcase classname="API security tests SQL injection-like input should not crash the API" name="API security tests SQL injection-like input should not crash the API" time="0.008">
+    </testcase>
+    <testcase classname="API security tests Very long query parameter should not crash the API" name="API security tests Very long query parameter should not crash the API" time="0.003">
+    </testcase>
+    <testcase classname="API security tests Oversized JSON body should return 413" name="API security tests Oversized JSON body should return 413" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /api/health" errors="0" failures="0" skipped="0" timestamp="2026-10-28T17:07:21" time="0.061" tests="1">
+    <testcase classname="GET /api/health should return HTTP 200 and the API status" name="GET /api/health should return HTTP 200 and the API status" time="0.004">
+    </testcase>
+  </testsuite>
+</testsuites>
