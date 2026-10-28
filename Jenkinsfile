@@ -6,8 +6,6 @@ pipeline {
     }
 
     environment {
-        FRONTEND_IMAGE = 'devsecops-portfolio:latest'
-        API_IMAGE      = 'devsecops-api:latest'
         API_TEST_IMAGE = 'devsecops-api-test:latest'
         TEST_DATABASE  = 'portfolio_test'
     }
@@ -21,9 +19,32 @@ pipeline {
             }
         }
 
+        stage('Get Git SHA') {
+            steps {
+                script {
+                    env.GIT_SHA = sh(
+                        script: 'git rev-parse --short=7 HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    env.FRONTEND_IMAGE =
+                        "devsecops-portfolio:${env.GIT_SHA}"
+
+                    env.API_IMAGE =
+                        "devsecops-api:${env.GIT_SHA}"
+
+                    echo "Git SHA: ${env.GIT_SHA}"
+                    echo "Frontend image: ${env.FRONTEND_IMAGE}"
+                    echo "API image: ${env.API_IMAGE}"
+                }
+            }
+        }
+
         stage('Check Environment') {
             steps {
                 sh '''
+                    set -eu
+
                     echo "===== NODE.JS ====="
                     node --version
                     npm --version
@@ -31,6 +52,13 @@ pipeline {
                     echo "===== DOCKER ====="
                     docker --version
                     docker compose version
+
+                    echo "===== GIT ====="
+                    git --version
+
+                    echo "===== DOCKER ACCESS ====="
+                    docker info >/dev/null
+                    echo "Docker daemon is accessible."
                 '''
             }
         }
@@ -94,13 +122,18 @@ pipeline {
 
                     if [ "$ready" != "true" ]; then
                         echo "ERROR: PostgreSQL did not become ready."
+                        docker compose logs postgres
                         exit 1
                     fi
 
-                    echo "===== CREATE TEST DATABASE IF NEEDED ====="
+                    echo "===== READ DATABASE USER ====="
 
                     DB_USER=$(docker compose exec -T postgres \
                         sh -c 'printf "%s" "$POSTGRES_USER"')
+
+                    echo "Database user: $DB_USER"
+
+                    echo "===== CREATE TEST DATABASE IF NEEDED ====="
 
                     if ! docker compose exec -T postgres \
                         psql -U "$DB_USER" -d postgres -tAc \
@@ -175,6 +208,8 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 script {
+                    echo "Building ${env.FRONTEND_IMAGE}"
+
                     docker.build(
                         env.FRONTEND_IMAGE,
                         '.'
@@ -186,6 +221,8 @@ pipeline {
         stage('Build API Docker Image') {
             steps {
                 script {
+                    echo "Building ${env.API_IMAGE}"
+
                     docker.build(
                         env.API_IMAGE,
                         './api'
@@ -193,24 +230,90 @@ pipeline {
                 }
             }
         }
+
+        stage('Verify Docker Images') {
+            steps {
+                sh '''
+                    set -eu
+
+                    echo "===== VERIFY GIT SHA ====="
+
+                    if [ -z "$GIT_SHA" ]; then
+                        echo "ERROR: Git SHA is empty."
+                        exit 1
+                    fi
+
+                    echo "Git SHA: $GIT_SHA"
+
+                    echo "===== VERIFY FRONTEND IMAGE ====="
+
+                    EXPECTED_FRONTEND="devsecops-portfolio:$GIT_SHA"
+
+                    docker image inspect "$EXPECTED_FRONTEND" >/dev/null
+
+                    echo "Frontend image exists: $EXPECTED_FRONTEND"
+
+                    echo "===== VERIFY API IMAGE ====="
+
+                    EXPECTED_API="devsecops-api:$GIT_SHA"
+
+                    docker image inspect "$EXPECTED_API" >/dev/null
+
+                    echo "API image exists: $EXPECTED_API"
+
+                    echo "===== VERIFY IMAGE TAGS ====="
+
+                    if [ "$FRONTEND_IMAGE" != "$EXPECTED_FRONTEND" ]; then
+                        echo "ERROR: Frontend tag does not match Git SHA."
+                        exit 1
+                    fi
+
+                    if [ "$API_IMAGE" != "$EXPECTED_API" ]; then
+                        echo "ERROR: API tag does not match Git SHA."
+                        exit 1
+                    fi
+
+                    echo "===== VERIFIED IMAGES ====="
+
+                    docker image ls \
+                        --format '{{.Repository}}:{{.Tag}}' \
+                        | grep -F -x "$EXPECTED_FRONTEND"
+
+                    docker image ls \
+                        --format '{{.Repository}}:{{.Tag}}' \
+                        | grep -F -x "$EXPECTED_API"
+
+                    echo "SUCCESS: Both Docker images are verified."
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo '''
-            SUCCESS!
-            Frontend tests passed.
-            API tests passed.
+            echo """
+            ==========================================
+            PIPELINE SUCCESS!
+            ==========================================
+            Git SHA: ${env.GIT_SHA}
+            Frontend image: ${env.FRONTEND_IMAGE}
+            API image: ${env.API_IMAGE}
+
+            Frontend tests completed.
+            API tests completed.
             Next.js build completed.
-            Frontend and API Docker images were built.
-            '''
+            Docker images built and verified.
+            ==========================================
+            """
         }
 
         failure {
             echo '''
-            FAILURE!
-            The pipeline failed.
+            ==========================================
+            PIPELINE FAILURE!
+            ==========================================
             Check the failed stage in Jenkins Console Output.
+            ==========================================
             '''
         }
 

@@ -900,6 +900,30 @@ The pipeline must fail if a required test fails. Docker image builds must not pr
 
 The following screenshot shows the Jenkins pipeline stages for the automated frontend and API tests.
 
-![Jenkins automated frontend and API test stages](images/jenkins-tests.png)
+![Jenkins automated frontend and API test stages](images/52-jenkins-tests.png)
+
+### 62. Construction automatique des images Docker avec Jenkins
+
+#### Objectif
+
+Automatiser la construction des images Docker du frontend et de l'API à l'aide du pipeline Jenkins.
+
+#### Étapes du pipeline
+
+**1. Build Frontend Docker Image**
+
+Jenkins utilise le `Dockerfile` situé à la racine du dépôt pour construire l'image `devsecops-portfolio:latest`.
+
+**2. Build API Docker Image**
+
+Jenkins utilise le `Dockerfile` du dossier `api/` pour construire l'image `devsecops-api:latest`.
+
+Ces étapes sont exécutées automatiquement après les étapes précédentes du pipeline.
+
+#### Capture d'écran
+
+La capture suivante montre les étapes de construction des images Docker dans Jenkins.
+
+![Construction automatique des images Docker dans Jenkins](images/52-jenkins-tests.png)
 
 ## XVI. Pipeline DevSecOps Jenkins
