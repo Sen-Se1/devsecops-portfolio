@@ -103,6 +103,41 @@ pipeline {
             }
         }
 
+        stage('NPM Audit (Dependencies)') {
+            parallel {
+                stage('Audit Frontend') {
+                    steps {
+                        sh '''
+                            set -eu
+                            npm audit --omit=dev --json > npm-audit-frontend.json || true
+                            npm audit --omit=dev --audit-level=high
+                        '''
+                    }
+                }
+
+                stage('Audit API') {
+                    steps {
+                        dir('api') {
+                            sh '''
+                                set -eu
+                                npm audit --omit=dev --json > npm-audit-api.json || true
+                                npm audit --omit=dev --audit-level=high
+                            '''
+                        }
+                    }
+                }
+            }
+
+            post {
+                always {
+                    archiveArtifacts(
+                        artifacts: 'npm-audit-frontend.json, api/npm-audit-api.json',
+                        allowEmptyArchive: true
+                    )
+                }
+            }
+        }
+
         stage('API Tests') {
             steps {
                 sh '''
