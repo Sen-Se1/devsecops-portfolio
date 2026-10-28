@@ -310,7 +310,7 @@ pipeline {
             }
         }
 
-        stage('Trivy Docker Image Scan') {
+        stage('Trivy Security Gate') {
             steps {
                 sh '''
                     set -eu
@@ -324,6 +324,7 @@ pipeline {
                         image \
                         --scanners vuln \
                         --severity HIGH,CRITICAL \
+                        --exit-code 1 \
                         --format json \
                         --output /reports/frontend.json \
                         "$FRONTEND_IMAGE"
@@ -335,11 +336,13 @@ pipeline {
                         image \
                         --scanners vuln \
                         --severity HIGH,CRITICAL \
+                        --exit-code 1 \
                         --format json \
                         --output /reports/api.json \
                         "$API_IMAGE"
                 '''
             }
+
             post {
                 always {
                     archiveArtifacts artifacts: 'trivy-reports/*.json',
