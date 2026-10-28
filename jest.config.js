@@ -12,6 +12,15 @@ const customJestConfig = {
     "<rootDir>/.next/",
     "<rootDir>/api/tests/",
   ],
+  reporters: [
+    "default",
+    [
+      "jest-junit",
+      {
+        outputName: "junit.xml",
+      },
+    ],
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);
