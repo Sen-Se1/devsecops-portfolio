@@ -729,7 +729,7 @@ before starting the application. Migration files are stored in `api/prisma/migra
 
 ## XIV. Application tests
 
-### 14. Tests applicatifs — API Express
+### 58. Tests applicatifs — API Express
 
 The API uses Jest and Supertest to test Express routes automatically.
 
@@ -771,7 +771,7 @@ The test execution completed successfully:
 
 ![Successful Express API tests](images/49-api-tests.png)
 
-### 15. Tests automatisés de sécurité de l'API
+### 59. Tests automatisés de sécurité de l'API
 
 #### Objectif
 
@@ -812,13 +812,13 @@ Après exécution, les résultats doivent être reportés à partir de la sortie
 
 ![Successful Express API tests](images/50-api-tests.png)
 
-## Activity 60 — Frontend → API → PostgreSQL Integration Tests
+### 60. Frontend → API → PostgreSQL Integration Tests
 
-### Objective
+#### Objective
 
 Verify the contact form submission workflow, from the frontend to the API and PostgreSQL database.
 
-### Tested Architecture
+#### Tested Architecture
 
 1. The `components/Contact.tsx` component collects the contact form data.
 2. The `submitContact()` function in `lib/api.ts` sends an HTTP `POST /api/contact` request.
@@ -826,13 +826,13 @@ Verify the contact form submission workflow, from the frontend to the API and Po
 4. The `contactController.js` controller uses Prisma to store the message.
 5. PostgreSQL saves the message in the `contact_messages` table.
 
-### Test Scenarios
+#### Test Scenarios
 
 - **Valid contact submission:** Expect HTTP `201` and verify that the message is stored in PostgreSQL.
 - **Invalid email submission:** Expect HTTP `400` and verify that no database record is created.
 - **API health and security tests:** Run the existing automated tests to verify API availability and error handling.
 
-### Commands Used
+#### Commands Used
 
 Check the running Docker services:
 
@@ -866,7 +866,7 @@ docker run --rm \
 
 > If your PostgreSQL credentials differ from the defaults in `docker-compose.yml`, update the connection string accordingly. Do not commit database passwords to the repository.
 
-### Test Results
+#### Test Results
 
 Complete this section after running the tests:
 
@@ -875,9 +875,31 @@ Complete this section after running the tests:
 - **Database persistence verification:** To be confirmed.
 - **Browser-based frontend integration test:** To be confirmed.
 
-### Test Execution Screenshot
+#### Test Execution Screenshot
 
 ![Integration test results](images/51-api-integration-tests.png)
 
 ## XV. Jenkins : tests et images Docker
+
+### 61. Jenkins Automated Tests and Docker Images
+
+#### Objective
+
+Configure Jenkins to automatically execute the frontend and API tests before building the Docker images.
+
+#### Pipeline Stages
+
+- **Frontend Tests:** Run the frontend test suite using Jest.
+- **API Tests:** Run the API health, security, and integration tests.
+- **Build Next.js:** Build the frontend application after the tests pass.
+- **Build Docker Images:** Build the frontend and API Docker images.
+
+The pipeline must fail if a required test fails. Docker image builds must not proceed after a failed test stage.
+
+#### Screenshot
+
+The following screenshot shows the Jenkins pipeline stages for the automated frontend and API tests.
+
+![Jenkins automated frontend and API test stages](images/jenkins-tests.png)
+
 ## XVI. Pipeline DevSecOps Jenkins
