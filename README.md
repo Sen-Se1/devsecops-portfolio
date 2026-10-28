@@ -926,4 +926,43 @@ La capture suivante montre les étapes de construction des images Docker dans Je
 
 ![Construction automatique des images Docker dans Jenkins](images/52-jenkins-tests.png)
 
+### 63. Tag des images Docker avec Git SHA
+
+#### Objectif
+
+Configurer Jenkins pour utiliser le SHA abrégé du commit Git comme tag des images Docker, puis vérifier automatiquement que les deux images ont été construites correctement.
+
+#### Exemple d'images générées
+
+Pour un commit dont le SHA abrégé est `a1b2c3d`, les images Docker générées sont :
+
+```text
+devsecops-portfolio:a1b2c3d
+devsecops-api:a1b2c3d
+```
+
+> **Remarque :** `a1b2c3d` est un exemple. Jenkins utilise automatiquement le véritable SHA du commit traité.
+
+#### Vérification des images Docker
+
+Le stage `Verify Docker Images` vérifie :
+- que le Git SHA est défini ;
+- que l'image du frontend existe ;
+- que l'image de l'API existe ;
+- que les tags des deux images correspondent au Git SHA.
+
+#### Capture d'écran du pipeline Jenkins
+
+La capture suivante présente le stage de vérification des images Docker après leur construction.
+
+![Vérification des images Docker dans Jenkins](images/53-verify-docker-images.png)
+
+#### Vérification manuelle
+
+Les images peuvent également être consultées sur la machine exécutant Docker avec la commande :
+
+```bash
+docker images | grep -E 'devsecops-portfolio|devsecops-api'
+```
+
 ## XVI. Pipeline DevSecOps Jenkins
