@@ -1,0 +1,10 @@
+{
+  "accepted": [
+    {
+      "id": "GHSA-ggr8-5vv4-36mx",
+      "package": "deepmerge-ts (via prisma > @prisma/config)",
+      "reason": "Only used by the Prisma CLI to merge the static prisma.config.ts; no untrusted input reaches it. The fix requires Prisma 7 (breaking upgrade), planned as a separate task.",
+      "expires": "2026-12-31"
+    }
+  ]
+}

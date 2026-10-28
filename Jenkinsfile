@@ -16,8 +16,11 @@ pipeline {
     environment {
         API_TEST_IMAGE = 'devsecops-api-test:latest'
         TEST_DATABASE  = 'portfolio_test'
+
         GITLEAKS_IMAGE = 'ghcr.io/gitleaks/gitleaks:latest'
         SEMGREP_IMAGE  = 'semgrep/semgrep:latest'
+        ODC_IMAGE      = 'owasp/dependency-check:latest'
+
         NPM_AUDIT_LEVEL = 'high'
     }
 
@@ -113,6 +116,45 @@ pipeline {
                     archiveArtifacts(
                         artifacts: 'npm-audit-frontend.json, api/npm-audit-api.json',
                         allowEmptyArchive: true
+                    )
+                }
+            }
+        }
+
+        stage('OWASP Dependency-Check') {
+            steps {
+                sh '''
+                    set -eu
+
+                    mkdir -p "$WORKSPACE/odc-reports"
+                    mkdir -p "$WORKSPACE/odc-data"
+
+                    docker pull "$ODC_IMAGE"
+
+                    docker run --rm \
+                        -v "$WORKSPACE:/src" \
+                        -v "$WORKSPACE/odc-reports:/report" \
+                        -v "$WORKSPACE/odc-data:/usr/share/dependency-check/data" \
+                        "$ODC_IMAGE" \
+                        --project "DevSecOps Portfolio" \
+                        --scan /src/package-lock.json \
+                        --scan /src/api/package-lock.json \
+                        --format HTML \
+                        --out /report
+
+                    if [ ! -f "$WORKSPACE/odc-reports/dependency-check-report.html" ]; then
+                        echo "ERROR: Dependency-Check HTML report was not generated."
+                        exit 1
+                    fi
+                '''
+            }
+
+            post {
+                always {
+                    archiveArtifacts(
+                        artifacts: 'odc-reports/**',
+                        allowEmptyArchive: true,
+                        fingerprint: true
                     )
                 }
             }
