@@ -971,70 +971,70 @@ docker images | grep -E 'devsecops-portfolio|devsecops-api'
 
 #### Objective
 
-OWASP Dependency-Check is a Software Composition Analysis (SCA)
-tool used to identify dependencies associated with publicly
-disclosed vulnerabilities.
+OWASP Dependency-Check is a Software Composition Analysis (SCA) tool used to identify publicly disclosed vulnerabilities in project dependencies. It complements `npm audit` by providing an additional security analysis of the application's third-party components.
 
-It complements `npm audit` in the Jenkins CI pipeline.
+In this project, OWASP Dependency-Check scans the dependency lock files of the frontend and backend:
 
-#### Dependencies analyzed
+- `package-lock.json` — Next.js frontend dependencies.
+- `api/package-lock.json` — Node.js/Express API dependencies.
 
-The pipeline analyzes the dependency lock files of:
+#### Jenkins Integration
 
-- Frontend: `package-lock.json`
-- Backend API: `api/package-lock.json`
+OWASP Dependency-Check is integrated into the Jenkins CI pipeline as a dedicated security stage.
 
-#### Pipeline integration
+The stage performs the following operations:
 
-The `OWASP Dependency-Check` stage:
+1. Creates directories for the HTML report and vulnerability database.
+2. Downloads the OWASP Dependency-Check Docker image.
+3. Scans the frontend and backend dependency lock files.
+4. Generates an HTML security report.
+5. Archives the report as a Jenkins build artifact.
 
-1. Downloads the Dependency-Check Docker image.
-2. Scans the frontend and backend dependency lock files.
-3. Generates an HTML vulnerability report.
-4. Archives the report as a Jenkins build artifact.
-
-#### Generated report
-
-The report is generated at:
+The generated report is available at:
 
 `odc-reports/dependency-check-report.html`
 
-To access it, open the corresponding Jenkins build and
-download the archived report.
+**Note:** The initial scan may take several minutes because Dependency-Check needs to download and initialize its vulnerability database. Internet access is required for database updates and vulnerability lookups.
 
-#### Example of a vulnerable dependency
+#### Example of a Vulnerable Dependency
 
-For example, an older version of `lodash` may be associated
-with a publicly disclosed vulnerability.
+**Package:** `lodash`  
+**CVE:** `CVE-2021-23337`  
+**Vulnerability:** Command Injection  
+**Affected versions:** Lodash versions earlier than `4.17.21`  
+**Fixed version:** `4.17.21`
 
-If a scan identifies a vulnerable dependency, the report
-should be checked for:
+CVE-2021-23337 describes a command-injection vulnerability affecting certain Lodash versions through its template functionality. The vulnerability is documented in the National Vulnerability Database (NVD).
 
-- Dependency name
-- Installed version
-- CVE identifier, when available
-- Severity
-- Description of the vulnerability
-- Recommended remediation
+**Detection workflow:**
 
-**Important:** This is an illustrative example, not a claim
-that the current project contains a vulnerable version of
-`lodash`. The actual dependency and CVE must be taken from
-the generated report.
+1. Jenkins starts the OWASP Dependency-Check stage.
+2. Dependency-Check analyzes the frontend and backend dependency lock files.
+3. The tool compares identified components against supported vulnerability information sources.
+4. If a vulnerable component is identified and matched to a known vulnerability, its details may appear in the generated report.
+5. The developer reviews the finding and upgrades the affected dependency to a fixed version.
 
-#### Security tools
+**Remediation example:**
 
-| Tool | Purpose |
-|---|---|
-| Gitleaks | Detects exposed secrets |
-| Semgrep | Performs static application security testing (SAST) |
-| npm audit | Checks known vulnerabilities in npm dependencies |
-| OWASP Dependency-Check | Identifies dependencies associated with known vulnerabilities |
+If the project uses an affected Lodash version, update it to a compatible, fixed version:
 
-#### Limitations
+```bash
+npm install lodash@4.17.21
+```
 
-Dependency-Check results depend on the available vulnerability
-data and the analyzers supported by the tool.
+Then regenerate the lock file, run the tests, and execute the security pipeline again.
 
-An empty report does not guarantee that the application is
-free of vulnerabilities.
+**Important:** Lodash is used here as an illustrative example of a publicly documented vulnerability. This does not mean that the current project contains a vulnerable Lodash version. Confirm the actual dependencies and findings in the generated report.
+
+#### Report Verification
+
+After a successful Jenkins build:
+
+1. Open the corresponding Jenkins build.
+2. Navigate to **Build Artifacts**.
+3. Open or download `odc-reports/dependency-check-report.html`.
+4. Review the identified dependencies, vulnerability details, and remediation information.
+
+The report helps developers assess dependency-related security risks and prioritize remediation.
+
+**Security limitation:** Generating and archiving the report does not automatically fail the Jenkins pipeline when a vulnerability is detected. A severity threshold or an explicit vulnerability-gating step must be configured if vulnerable dependencies should block the build.
