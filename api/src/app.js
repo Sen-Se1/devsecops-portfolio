@@ -6,8 +6,8 @@ const apiRoutes = require("./routes");
 const ApiError = require("./utils/ApiError");
 const errorHandler = require("./middleware/errorHandler");
 
-// nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 // Stateless JSON API: no cookies or sessions, CORS credentials disabled, so CSRF does not apply.
+// nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 const app = express();
 
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000")
