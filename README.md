@@ -967,4 +967,74 @@ docker images | grep -E 'devsecops-portfolio|devsecops-api'
 
 ## XVI. Pipeline DevSecOps Jenkins
 
+### 67. OWASP Dependency-Check
 
+#### Objective
+
+OWASP Dependency-Check is a Software Composition Analysis (SCA)
+tool used to identify dependencies associated with publicly
+disclosed vulnerabilities.
+
+It complements `npm audit` in the Jenkins CI pipeline.
+
+#### Dependencies analyzed
+
+The pipeline analyzes the dependency lock files of:
+
+- Frontend: `package-lock.json`
+- Backend API: `api/package-lock.json`
+
+#### Pipeline integration
+
+The `OWASP Dependency-Check` stage:
+
+1. Downloads the Dependency-Check Docker image.
+2. Scans the frontend and backend dependency lock files.
+3. Generates an HTML vulnerability report.
+4. Archives the report as a Jenkins build artifact.
+
+#### Generated report
+
+The report is generated at:
+
+`odc-reports/dependency-check-report.html`
+
+To access it, open the corresponding Jenkins build and
+download the archived report.
+
+#### Example of a vulnerable dependency
+
+For example, an older version of `lodash` may be associated
+with a publicly disclosed vulnerability.
+
+If a scan identifies a vulnerable dependency, the report
+should be checked for:
+
+- Dependency name
+- Installed version
+- CVE identifier, when available
+- Severity
+- Description of the vulnerability
+- Recommended remediation
+
+**Important:** This is an illustrative example, not a claim
+that the current project contains a vulnerable version of
+`lodash`. The actual dependency and CVE must be taken from
+the generated report.
+
+#### Security tools
+
+| Tool | Purpose |
+|---|---|
+| Gitleaks | Detects exposed secrets |
+| Semgrep | Performs static application security testing (SAST) |
+| npm audit | Checks known vulnerabilities in npm dependencies |
+| OWASP Dependency-Check | Identifies dependencies associated with known vulnerabilities |
+
+#### Limitations
+
+Dependency-Check results depend on the available vulnerability
+data and the analyzers supported by the tool.
+
+An empty report does not guarantee that the application is
+free of vulnerabilities.
