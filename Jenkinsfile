@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+        skipDefaultCheckout(true)
+    }
+
     tools {
         nodejs 'NodeJS-22'
     }
@@ -8,6 +16,9 @@ pipeline {
     environment {
         API_TEST_IMAGE = 'devsecops-api-test:latest'
         TEST_DATABASE  = 'portfolio_test'
+        GITLEAKS_IMAGE = 'ghcr.io/gitleaks/gitleaks:latest'
+        SEMGREP_IMAGE  = 'semgrep/semgrep:latest'
+        NPM_AUDIT_LEVEL = 'high'
     }
 
     stages {
@@ -44,7 +55,7 @@ pipeline {
                     docker run --rm \
                         -v "$WORKSPACE:/repo" \
                         -w /repo \
-                        ghcr.io/gitleaks/gitleaks:latest \
+                        "$GITLEAKS_IMAGE" \
                         git --redact --verbose .
                 '''
             }
@@ -58,13 +69,52 @@ pipeline {
                     docker run --rm \
                         -v "$WORKSPACE:/src" \
                         -w /src \
-                        semgrep/semgrep:latest \
+                        "$SEMGREP_IMAGE" \
                         semgrep scan \
                         --config p/default \
                         --metrics=off \
                         --error \
                         .
                 '''
+            }
+        }
+
+        stage('NPM Audit (Dependencies)') {
+            parallel {
+                stage('Audit Frontend') {
+                    steps {
+                        sh '''
+                            set -eu
+
+                            npm audit --omit=dev --json > npm-audit-frontend.json || true
+
+                            npm audit --omit=dev --audit-level="$NPM_AUDIT_LEVEL"
+                        '''
+                    }
+                }
+
+                stage('Audit API') {
+                    steps {
+                        dir('api') {
+                            sh '''
+                                set -eu
+
+                                npm audit --omit=dev --json > npm-audit-api.json || true
+
+                                npm audit --omit=dev --audit-level="$NPM_AUDIT_LEVEL"
+                            '''
+                        }
+                    }
+                }
+            }
+
+            post {
+                always {
+                    archiveArtifacts(
+                        artifacts: 'npm-audit-frontend.json, api/npm-audit-api.json',
+                        allowEmptyArchive: true
+                    )
+                }
             }
         }
 
@@ -103,41 +153,6 @@ pipeline {
             }
         }
 
-        stage('NPM Audit (Dependencies)') {
-            parallel {
-                stage('Audit Frontend') {
-                    steps {
-                        sh '''
-                            set -eu
-                            npm audit --omit=dev --json > npm-audit-frontend.json || true
-                            npm audit --omit=dev --audit-level=high
-                        '''
-                    }
-                }
-
-                stage('Audit API') {
-                    steps {
-                        dir('api') {
-                            sh '''
-                                set -eu
-                                npm audit --omit=dev --json > npm-audit-api.json || true
-                                npm audit --omit=dev --audit-level=high
-                            '''
-                        }
-                    }
-                }
-            }
-
-            post {
-                always {
-                    archiveArtifacts(
-                        artifacts: 'npm-audit-frontend.json, api/npm-audit-api.json',
-                        allowEmptyArchive: true
-                    )
-                }
-            }
-        }
-
         stage('API Tests') {
             steps {
                 sh '''
@@ -166,10 +181,13 @@ pipeline {
                         exit 1
                     fi
 
-                    echo "===== READ DATABASE USER ====="
+                    echo "===== READ DATABASE CREDENTIALS ====="
 
                     DB_USER=$(docker compose exec -T postgres \
                         sh -c 'printf "%s" "$POSTGRES_USER"')
+
+                    DB_PASS=$(docker compose exec -T postgres \
+                        sh -c 'printf "%s" "$POSTGRES_PASSWORD"')
 
                     echo "Database user: $DB_USER"
 
@@ -177,12 +195,12 @@ pipeline {
 
                     if ! docker compose exec -T postgres \
                         psql -U "$DB_USER" -d postgres -tAc \
-                        "SELECT 1 FROM pg_database WHERE datname='portfolio_test'" \
+                        "SELECT 1 FROM pg_database WHERE datname='$TEST_DATABASE'" \
                         | grep -q 1; then
 
                         docker compose exec -T postgres \
                             psql -U "$DB_USER" -d postgres \
-                            -c "CREATE DATABASE portfolio_test OWNER $DB_USER;"
+                            -c "CREATE DATABASE $TEST_DATABASE OWNER $DB_USER;"
                     fi
 
                     echo "===== BUILD API TEST IMAGE ====="
@@ -217,10 +235,13 @@ pipeline {
 
                     echo "===== RUN API MIGRATIONS AND TESTS ====="
 
+                    # Do not echo the command: it contains the database password.
+                    set +x
+
                     docker run --rm \
                         --network "$NETWORK" \
                         --user "$(id -u):$(id -g)" \
-                        -e DATABASE_URL="postgresql://${DB_USER}:portfolio_pass@postgres:5432/${TEST_DATABASE}?schema=public" \
+                        -e DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${TEST_DATABASE}?schema=public" \
                         -e JEST_JUNIT_OUTPUT_DIR=/app/test-results \
                         -e JEST_JUNIT_OUTPUT_NAME=junit.xml \
                         -v "$WORKSPACE/api/test-results:/app/test-results" \
@@ -235,6 +256,7 @@ pipeline {
                         testResults: 'api/test-results/junit.xml',
                         allowEmptyResults: true
                     )
+                    sh 'docker compose down || true'
                 }
             }
         }
@@ -270,6 +292,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Verify Docker Images') {
+            steps {
+                sh '''
+                    set -eu
+
+                    docker image inspect "$FRONTEND_IMAGE" > /dev/null
+                    docker image inspect "$API_IMAGE" > /dev/null
+
+                    docker images \
+                        --filter "reference=devsecops-portfolio:${GIT_SHA}" \
+                        --filter "reference=devsecops-api:${GIT_SHA}"
+                '''
+            }
+        }
     }
 
     post {
@@ -282,6 +319,9 @@ pipeline {
             Frontend image: ${env.FRONTEND_IMAGE}
             API image: ${env.API_IMAGE}
 
+            Secret scan (Gitleaks) passed.
+            SAST scan (Semgrep) passed.
+            Dependency audit (npm audit) passed.
             Frontend tests completed.
             API tests completed.
             Next.js build completed.
