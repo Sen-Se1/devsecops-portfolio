@@ -35,6 +35,7 @@ services:
     environment:
       API_PORT: 4000
       DATABASE_URL: postgresql://${POSTGRES_USER:-portfolio_user}:${POSTGRES_PASSWORD:-portfolio_pass}@postgres:5432/${POSTGRES_DB:-portfolio}?schema=public
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://frontend:3000}
     depends_on:
       postgres:
         condition: service_healthy
