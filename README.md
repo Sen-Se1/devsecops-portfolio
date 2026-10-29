@@ -1038,3 +1038,34 @@ After a successful Jenkins build:
 The report helps developers assess dependency-related security risks and prioritize remediation.
 
 **Security limitation:** Generating and archiving the report does not automatically fail the Jenkins pipeline when a vulnerability is detected. A severity threshold or an explicit vulnerability-gating step must be configured if vulnerable dependencies should block the build.
+
+### 69. Security Gates Jenkins
+
+#### Objectif
+
+Configurer le pipeline CI/CD pour qu'il échoue lorsqu'un secret est détecté par Gitleaks ou lorsqu'une vulnérabilité critique est détectée par Trivy dans les images Docker du frontend ou de l'API.
+
+#### Contrôles de sécurité
+
+- **Gitleaks :** détecte les secrets exposés et bloque le pipeline lorsque la commande renvoie un code de sortie non nul.
+- **Trivy :** analyse les images Docker du frontend et de l'API. Le pipeline échoue lorsqu'une vulnérabilité de sévérité CRITICAL est détectée.
+- **npm audit :** vérifie les vulnérabilités des dépendances.
+- **Semgrep :** recherche des problèmes de sécurité dans le code source.
+
+#### Résultat 1 — Pipeline réussi
+
+Le pipeline termine toutes les étapes avec le statut `SUCCESS`.
+
+![Pipeline Jenkins réussi](images/54-pipeline-success.png)
+
+#### Résultat 2 — Pipeline volontairement échoué
+
+Un test contrôlé permet de vérifier que le pipeline bloque l'exécution lorsqu'un secret fictif est détecté par Gitleaks.
+
+Le résultat attendu est le statut `FAILURE` au niveau du stage `Gitleaks Secret Scan`.
+
+![Pipeline Jenkins échoué après détection d'un secret](images/55-pipeline-failure-secret.png)
+
+#### Conclusion
+
+Les contrôles de sécurité sont intégrés au pipeline CI/CD. La détection d'un secret ou d'une vulnérabilité critique dans les images Docker empêche le pipeline de terminer avec succès.

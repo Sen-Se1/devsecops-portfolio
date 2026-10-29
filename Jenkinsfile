@@ -58,7 +58,7 @@ pipeline {
                         -v "$WORKSPACE:/repo" \
                         -w /repo \
                         "$GITLEAKS_IMAGE" \
-                        git --redact --verbose .
+                        git --redact --verbose --exit-code 1 .
                 '''
             }
         }
@@ -337,7 +337,7 @@ pipeline {
                                 aquasec/trivy:latest \
                                 image \
                                 --scanners vuln \
-                                --severity CRITICAL \
+                                --severity HIGH,CRITICAL \
                                 --exit-code 1 \
                                 --format json \
                                 --output /reports/frontend.json \
@@ -359,7 +359,7 @@ pipeline {
                                 aquasec/trivy:latest \
                                 image \
                                 --scanners vuln \
-                                --severity CRITICAL \
+                                --severity HIGH,CRITICAL \
                                 --exit-code 1 \
                                 --format json \
                                 --output /reports/api.json \
