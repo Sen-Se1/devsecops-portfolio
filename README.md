@@ -1052,19 +1052,11 @@ Configurer le pipeline CI/CD pour qu'il échoue lorsqu'un secret est détecté p
 - **npm audit :** vérifie les vulnérabilités des dépendances.
 - **Semgrep :** recherche des problèmes de sécurité dans le code source.
 
-#### Résultat 1 — Pipeline réussi
+#### Résultat — Pipeline réussi
 
 Le pipeline termine toutes les étapes avec le statut `SUCCESS`.
 
 ![Pipeline Jenkins réussi](images/54-pipeline-success.png)
-
-#### Résultat 2 — Pipeline volontairement échoué
-
-Un test contrôlé permet de vérifier que le pipeline bloque l'exécution lorsqu'un secret fictif est détecté par Gitleaks.
-
-Le résultat attendu est le statut `FAILURE` au niveau du stage `Gitleaks Secret Scan`.
-
-![Pipeline Jenkins échoué après détection d'un secret](images/55-pipeline-failure-secret.png)
 
 #### Conclusion
 
