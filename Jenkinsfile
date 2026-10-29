@@ -120,145 +120,153 @@ pipeline {
             }
         }
 
-        stage('Install Frontend Dependencies') {
-            steps {
-                sh 'npm ci'
-            }
-        }
+        stage('Install Dependencies') {
+            parallel {
+                stage('Install Frontend Dependencies') {
+                    steps {
+                        sh 'npm ci'
+                    }
+                }
 
-        stage('Frontend Tests') {
-            steps {
-                sh '''
-                    npm test -- \
-                      --runInBand \
-                      --ci \
-                      --reporters=default \
-                      --reporters=jest-junit
-                '''
-            }
-
-            post {
-                always {
-                    junit(
-                        testResults: 'junit.xml',
-                        allowEmptyResults: true
-                    )
+                stage('Install API Dependencies') {
+                    steps {
+                        dir('api') {
+                            sh 'npm ci'
+                        }
+                    }
                 }
             }
         }
 
-        stage('Install API Dependencies') {
-            steps {
-                dir('api') {
-                    sh 'npm ci'
+        stage('Frontend & API Tests') {
+            parallel {
+                stage('Frontend Tests') {
+                    steps {
+                        sh '''
+                            npm test -- \
+                            --runInBand \
+                            --ci \
+                            --reporters=default \
+                            --reporters=jest-junit
+                        '''
+                    }
+
+                    post {
+                        always {
+                            junit(
+                                testResults: 'junit.xml',
+                                allowEmptyResults: true
+                            )
+                        }
+                    }
                 }
-            }
-        }
+                
+                stage('API Tests') {
+                    steps {
+                        sh '''
+                            set -eu
 
-        stage('API Tests') {
-            steps {
-                sh '''
-                    set -eu
+                            echo "===== START POSTGRESQL ====="
 
-                    echo "===== START POSTGRESQL ====="
+                            docker compose up -d postgres
 
-                    docker compose up -d postgres
+                            echo "===== WAIT FOR POSTGRESQL ====="
 
-                    echo "===== WAIT FOR POSTGRESQL ====="
+                            ready=false
 
-                    ready=false
+                            for i in $(seq 1 30); do
+                                if docker compose exec -T postgres pg_isready; then
+                                    ready=true
+                                    break
+                                fi
 
-                    for i in $(seq 1 30); do
-                        if docker compose exec -T postgres pg_isready; then
-                            ready=true
-                            break
-                        fi
+                                sleep 2
+                            done
 
-                        sleep 2
-                    done
+                            if [ "$ready" != "true" ]; then
+                                echo "ERROR: PostgreSQL did not become ready."
+                                docker compose logs postgres
+                                exit 1
+                            fi
 
-                    if [ "$ready" != "true" ]; then
-                        echo "ERROR: PostgreSQL did not become ready."
-                        docker compose logs postgres
-                        exit 1
-                    fi
+                            echo "===== READ DATABASE CREDENTIALS ====="
 
-                    echo "===== READ DATABASE CREDENTIALS ====="
+                            DB_USER=$(docker compose exec -T postgres \
+                                sh -c 'printf "%s" "$POSTGRES_USER"')
 
-                    DB_USER=$(docker compose exec -T postgres \
-                        sh -c 'printf "%s" "$POSTGRES_USER"')
+                            DB_PASS=$(docker compose exec -T postgres \
+                                sh -c 'printf "%s" "$POSTGRES_PASSWORD"')
 
-                    DB_PASS=$(docker compose exec -T postgres \
-                        sh -c 'printf "%s" "$POSTGRES_PASSWORD"')
+                            echo "Database user: $DB_USER"
 
-                    echo "Database user: $DB_USER"
+                            echo "===== CREATE TEST DATABASE IF NEEDED ====="
 
-                    echo "===== CREATE TEST DATABASE IF NEEDED ====="
+                            if ! docker compose exec -T postgres \
+                                psql -U "$DB_USER" -d postgres -tAc \
+                                "SELECT 1 FROM pg_database WHERE datname='$TEST_DATABASE'" \
+                                | grep -q 1; then
 
-                    if ! docker compose exec -T postgres \
-                        psql -U "$DB_USER" -d postgres -tAc \
-                        "SELECT 1 FROM pg_database WHERE datname='$TEST_DATABASE'" \
-                        | grep -q 1; then
+                                docker compose exec -T postgres \
+                                    psql -U "$DB_USER" -d postgres \
+                                    -c "CREATE DATABASE $TEST_DATABASE OWNER $DB_USER;"
+                            fi
 
-                        docker compose exec -T postgres \
-                            psql -U "$DB_USER" -d postgres \
-                            -c "CREATE DATABASE $TEST_DATABASE OWNER $DB_USER;"
-                    fi
+                            echo "===== BUILD API TEST IMAGE ====="
 
-                    echo "===== BUILD API TEST IMAGE ====="
+                            docker build \
+                                -f api/Dockerfile.test \
+                                -t "$API_TEST_IMAGE" \
+                                ./api
 
-                    docker build \
-                        -f api/Dockerfile.test \
-                        -t "$API_TEST_IMAGE" \
-                        ./api
+                            echo "===== DETERMINE DOCKER NETWORK ====="
 
-                    echo "===== DETERMINE DOCKER NETWORK ====="
+                            POSTGRES_CONTAINER=$(docker compose ps -q postgres)
 
-                    POSTGRES_CONTAINER=$(docker compose ps -q postgres)
+                            if [ -z "$POSTGRES_CONTAINER" ]; then
+                                echo "ERROR: PostgreSQL container was not found."
+                                exit 1
+                            fi
 
-                    if [ -z "$POSTGRES_CONTAINER" ]; then
-                        echo "ERROR: PostgreSQL container was not found."
-                        exit 1
-                    fi
+                            NETWORK=$(docker inspect "$POSTGRES_CONTAINER" \
+                                --format '{{range $name, $value := .NetworkSettings.Networks}}{{$name}}{{end}}')
 
-                    NETWORK=$(docker inspect "$POSTGRES_CONTAINER" \
-                        --format '{{range $name, $value := .NetworkSettings.Networks}}{{$name}}{{end}}')
+                            if [ -z "$NETWORK" ]; then
+                                echo "ERROR: Could not determine Docker network."
+                                exit 1
+                            fi
 
-                    if [ -z "$NETWORK" ]; then
-                        echo "ERROR: Could not determine Docker network."
-                        exit 1
-                    fi
+                            echo "Using Docker network: $NETWORK"
 
-                    echo "Using Docker network: $NETWORK"
+                            echo "===== PREPARE JUNIT REPORT DIRECTORY ====="
 
-                    echo "===== PREPARE JUNIT REPORT DIRECTORY ====="
+                            mkdir -p "$WORKSPACE/api/test-results"
 
-                    mkdir -p "$WORKSPACE/api/test-results"
+                            echo "===== RUN API MIGRATIONS AND TESTS ====="
 
-                    echo "===== RUN API MIGRATIONS AND TESTS ====="
+                            # Do not echo the command: it contains the database password.
+                            set +x
 
-                    # Do not echo the command: it contains the database password.
-                    set +x
+                            docker run --rm \
+                                --network "$NETWORK" \
+                                --user "$(id -u):$(id -g)" \
+                                -e DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${TEST_DATABASE}?schema=public" \
+                                -e JEST_JUNIT_OUTPUT_DIR=/app/test-results \
+                                -e JEST_JUNIT_OUTPUT_NAME=junit.xml \
+                                -v "$WORKSPACE/api/test-results:/app/test-results" \
+                                "$API_TEST_IMAGE" \
+                                sh -c 'npx prisma migrate deploy && npm test -- --reporters=default --reporters=jest-junit'
+                        '''
+                    }
 
-                    docker run --rm \
-                        --network "$NETWORK" \
-                        --user "$(id -u):$(id -g)" \
-                        -e DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${TEST_DATABASE}?schema=public" \
-                        -e JEST_JUNIT_OUTPUT_DIR=/app/test-results \
-                        -e JEST_JUNIT_OUTPUT_NAME=junit.xml \
-                        -v "$WORKSPACE/api/test-results:/app/test-results" \
-                        "$API_TEST_IMAGE" \
-                        sh -c 'npx prisma migrate deploy && npm test -- --reporters=default --reporters=jest-junit'
-                '''
-            }
-
-            post {
-                always {
-                    junit(
-                        testResults: 'api/test-results/junit.xml',
-                        allowEmptyResults: true
-                    )
-                    sh 'docker compose down || true'
+                    post {
+                        always {
+                            junit(
+                                testResults: 'api/test-results/junit.xml',
+                                allowEmptyResults: true
+                            )
+                            sh 'docker compose down || true'
+                        }
+                    }
                 }
             }
         }
@@ -269,28 +277,32 @@ pipeline {
             }
         }
 
-        stage('Build Frontend Docker Image') {
-            steps {
-                script {
-                    echo "Building ${env.FRONTEND_IMAGE}"
+        stage('Build Docker Images') {
+            parallel {
+                stage('Build Frontend Docker Image') {
+                    steps {
+                        script {
+                            echo "Building ${env.FRONTEND_IMAGE}"
 
-                    docker.build(
-                        env.FRONTEND_IMAGE,
-                        '.'
-                    )
+                            docker.build(
+                                env.FRONTEND_IMAGE,
+                                '.'
+                            )
+                        }
+                    }
                 }
-            }
-        }
 
-        stage('Build API Docker Image') {
-            steps {
-                script {
-                    echo "Building ${env.API_IMAGE}"
+                stage('Build API Docker Image') {
+                    steps {
+                        script {
+                            echo "Building ${env.API_IMAGE}"
 
-                    docker.build(
-                        env.API_IMAGE,
-                        './api'
-                    )
+                            docker.build(
+                                env.API_IMAGE,
+                                './api'
+                            )
+                        }
+                    }
                 }
             }
         }
