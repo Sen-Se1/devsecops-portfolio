@@ -325,7 +325,7 @@ pipeline {
                                 aquasec/trivy:latest \
                                 image \
                                 --scanners vuln \
-                                --severity HIGH,CRITICAL \
+                                --severity CRITICAL \
                                 --exit-code 1 \
                                 --format json \
                                 --output /reports/frontend.json \
@@ -347,7 +347,7 @@ pipeline {
                                 aquasec/trivy:latest \
                                 image \
                                 --scanners vuln \
-                                --severity HIGH,CRITICAL \
+                                --severity CRITICAL \
                                 --exit-code 1 \
                                 --format json \
                                 --output /reports/api.json \

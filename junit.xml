@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="1" failures="0" errors="0" time="0.936">
-  <testsuite name="Portfolio frontend" errors="0" failures="0" skipped="0" timestamp="2026-10-28T19:35:46" time="0.398" tests="1">
-    <testcase classname="Portfolio frontend displays the portfolio title" name="Portfolio frontend displays the portfolio title" time="0.081">
+<testsuites name="jest tests" tests="1" failures="0" errors="0" time="0.648">
+  <testsuite name="Portfolio frontend" errors="0" failures="0" skipped="0" timestamp="2026-10-29T17:52:12" time="0.244" tests="1">
+    <testcase classname="Portfolio frontend displays the portfolio title" name="Portfolio frontend displays the portfolio title" time="0.057">
     </testcase>
   </testsuite>
 </testsuites>
