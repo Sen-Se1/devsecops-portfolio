@@ -1060,4 +1060,4 @@ Le pipeline termine toutes les étapes avec le statut `SUCCESS`.
 
 #### Conclusion
 
-Les contrôles de sécurité sont intégrés au pipeline CI/CD. La détection d'un secret ou d'une vulnérabilité critique dans les images Docker empêche le pipeline de terminer avec succès. 
+Les contrôles de sécurité sont intégrés au pipeline CI/CD. La détection d'un secret ou d'une vulnérabilité critique dans les images Docker empêche le pipeline de terminer avec succès.
