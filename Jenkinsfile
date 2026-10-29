@@ -49,47 +49,43 @@ pipeline {
             }
         }
 
-        stage('Gitleaks Secret Scan') {
-            steps {
-                sh '''
-                    set -eu
-
-                    docker run --rm \
-                        -v "$WORKSPACE:/repo" \
-                        -w /repo \
-                        "$GITLEAKS_IMAGE" \
-                        git --redact --verbose --exit-code 1 .
-                '''
-            }
-        }
-
-        stage('Semgrep SAST Scan') {
-            steps {
-                sh '''
-                    set -eu
-
-                    docker run --rm \
-                        -v "$WORKSPACE:/src" \
-                        -w /src \
-                        "$SEMGREP_IMAGE" \
-                        semgrep scan \
-                        --config p/default \
-                        --metrics=off \
-                        --error \
-                        .
-                '''
-            }
-        }
-
-        stage('NPM Audit (Dependencies)') {
+        stage('Parallel Security Checks') {
             parallel {
+                stage('Gitleaks Secret Scan') {
+                    steps {
+                        sh '''
+                            set -eu
+                            docker run --rm \
+                                -v "$WORKSPACE:/repo" \
+                                -w /repo \
+                                "$GITLEAKS_IMAGE" \
+                                git --redact --verbose --exit-code 1 .
+                        '''
+                    }
+                }
+
+                stage('Semgrep SAST Scan') {
+                    steps {
+                        sh '''
+                            set -eu
+                            docker run --rm \
+                                -v "$WORKSPACE:/src" \
+                                -w /src \
+                                "$SEMGREP_IMAGE" \
+                                semgrep scan \
+                                --config p/default \
+                                --metrics=off \
+                                --error \
+                                .
+                        '''
+                    }
+                }
+
                 stage('Audit Frontend') {
                     steps {
                         sh '''
                             set -eu
-
                             npm audit --omit=dev --json > npm-audit-frontend.json || true
-
                             node ci/npm-audit-gate.js "$NPM_AUDIT_LEVEL" < npm-audit-frontend.json
                         '''
                     }
@@ -100,16 +96,13 @@ pipeline {
                         dir('api') {
                             sh '''
                                 set -eu
-
                                 npm audit --omit=dev --json > npm-audit-api.json || true
-
                                 node ../ci/npm-audit-gate.js "$NPM_AUDIT_LEVEL" < npm-audit-api.json
                             '''
                         }
                     }
                 }
             }
-
             post {
                 always {
                     archiveArtifacts(
@@ -165,15 +158,10 @@ pipeline {
                     steps {
                         sh '''
                             set -eu
-
                             echo "===== START POSTGRESQL ====="
-
                             docker compose up -d postgres
-
                             echo "===== WAIT FOR POSTGRESQL ====="
-
                             ready=false
-
                             for i in $(seq 1 30); do
                                 if docker compose exec -T postgres pg_isready; then
                                     ready=true
@@ -283,11 +271,7 @@ pipeline {
                     steps {
                         script {
                             echo "Building ${env.FRONTEND_IMAGE}"
-
-                            docker.build(
-                                env.FRONTEND_IMAGE,
-                                '.'
-                            )
+                            docker.build( env.FRONTEND_IMAGE,'.')
                         }
                     }
                 }
@@ -296,29 +280,10 @@ pipeline {
                     steps {
                         script {
                             echo "Building ${env.API_IMAGE}"
-
-                            docker.build(
-                                env.API_IMAGE,
-                                './api'
-                            )
+                            docker.build(env.API_IMAGE,'./api')
                         }
                     }
                 }
-            }
-        }
-
-        stage('Verify Docker Images') {
-            steps {
-                sh '''
-                    set -eu
-
-                    docker image inspect "$FRONTEND_IMAGE" > /dev/null
-                    docker image inspect "$API_IMAGE" > /dev/null
-
-                    docker images \
-                        --filter "reference=devsecops-portfolio:${GIT_SHA}" \
-                        --filter "reference=devsecops-api:${GIT_SHA}"
-                '''
             }
         }
 
@@ -328,9 +293,7 @@ pipeline {
                     steps {
                         sh '''
                             set -eu
-
                             mkdir -p trivy-reports
-
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 -v "$WORKSPACE/trivy-reports:/reports" \
@@ -350,9 +313,7 @@ pipeline {
                     steps {
                         sh '''
                             set -eu
-
                             mkdir -p trivy-reports
-
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
                                 -v "$WORKSPACE/trivy-reports:/reports" \
