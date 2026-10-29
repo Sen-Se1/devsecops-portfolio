@@ -311,38 +311,51 @@ pipeline {
         }
 
         stage('Trivy Security Gate') {
-            steps {
-                sh '''
-                    set -eu
+            parallel {
+                stage('Trivy Frontend Scan') {
+                    steps {
+                        sh '''
+                            set -eu
 
-                    mkdir -p trivy-reports
+                            mkdir -p trivy-reports
 
-                    docker run --rm \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$WORKSPACE/trivy-reports:/reports" \
-                        aquasec/trivy:latest \
-                        image \
-                        --scanners vuln \
-                        --severity HIGH,CRITICAL \
-                        --exit-code 1 \
-                        --format json \
-                        --output /reports/frontend.json \
-                        "$FRONTEND_IMAGE"
+                            docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v "$WORKSPACE/trivy-reports:/reports" \
+                                aquasec/trivy:latest \
+                                image \
+                                --scanners vuln \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 1 \
+                                --format json \
+                                --output /reports/frontend.json \
+                                "$FRONTEND_IMAGE"
+                        '''
+                    }
+                }
 
-                    docker run --rm \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$WORKSPACE/trivy-reports:/reports" \
-                        aquasec/trivy:latest \
-                        image \
-                        --scanners vuln \
-                        --severity HIGH,CRITICAL \
-                        --exit-code 1 \
-                        --format json \
-                        --output /reports/api.json \
-                        "$API_IMAGE"
-                '''
+                stage('Trivy API Scan') {
+                    steps {
+                        sh '''
+                            set -eu
+
+                            mkdir -p trivy-reports
+
+                            docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v "$WORKSPACE/trivy-reports:/reports" \
+                                aquasec/trivy:latest \
+                                image \
+                                --scanners vuln \
+                                --severity HIGH,CRITICAL \
+                                --exit-code 1 \
+                                --format json \
+                                --output /reports/api.json \
+                                "$API_IMAGE"
+                        '''
+                    }
+                }
             }
-
             post {
                 always {
                     archiveArtifacts artifacts: 'trivy-reports/*.json',
