@@ -1,0 +1,90 @@
+
+name: Activity 5 - Frontend and API Tests
+
+on:
+  push:
+    branches:
+      - Activite-5
+  pull_request:
+    branches:
+      - Activite-5
+
+permissions:
+  contents: read
+
+concurrency:
+  group: activity-5-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-tests:
+    name: Frontend tests (Next.js)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm test -- --runInBand
+
+  api-tests:
+    name: API tests (Express + PostgreSQL)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: portfolio_test
+          POSTGRES_USER: portfolio_user
+          POSTGRES_PASSWORD: portfolio_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portfolio_user -d portfolio_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: api
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://portfolio_user:portfolio_pass@localhost:5432/portfolio_test?schema=public
+      CORS_ORIGIN: http://localhost:3000
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install API dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Run API tests
+        run: npm test
