@@ -1,5 +1,5 @@
 
-name: Activity 5 - Frontend and API Tests
+name: Activity 5 - CI Security Pipeline
 
 on:
   push:
@@ -13,33 +13,39 @@ permissions:
   contents: read
 
 concurrency:
-  group: activity-5-tests-${{ github.workflow }}-${{ github.ref }}
+  group: activity-5-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+
+  # ==================================
+  # 1. FRONTEND TESTS
+  # ==================================
   frontend-tests:
-    name: Frontend tests (Next.js)
+    name: Frontend Tests
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: package-lock.json
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         run: npm ci
 
       - name: Run frontend tests
         run: npm test -- --runInBand
 
+  # ==================================
+  # 2. API TESTS
+  # ==================================
   api-tests:
-    name: API tests (Express + PostgreSQL)
+    name: API Tests
     runs-on: ubuntu-24.04
 
     services:
@@ -67,24 +73,110 @@ jobs:
       CORS_ORIGIN: http://localhost:3000
 
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      - name: Install API dependencies
+      - name: Install dependencies
         run: npm ci
 
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Apply database migrations
+      - name: Apply migrations
         run: npx prisma migrate deploy
 
       - name: Run API tests
         run: npm test
+
+  # ==================================
+  # 3. SECRET SCANNING - GITLEAKS
+  # ==================================
+  secret-scanning:
+    name: Secret Scanning - Gitleaks
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout full Git history
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Scan repository for secrets
+        uses: gitleaks/gitleaks-action@v2
+
+  # ==================================
+  # 4. SAST - SEMGREP
+  # ==================================
+  sast:
+    name: SAST - Semgrep
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Semgrep
+        run: |
+          pipx install semgrep
+
+      - name: Scan source code
+        run: |
+          semgrep scan --config auto --error .
+
+  # ==================================
+  # 5. FRONTEND DEPENDENCY SCANNING
+  # ==================================
+  frontend-dependencies:
+    name: Frontend Dependencies - npm audit
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scan dependencies
+        run: npm audit --audit-level=high
+
+  # ==================================
+  # 6. API DEPENDENCY SCANNING
+  # ==================================
+  api-dependencies:
+    name: API Dependencies - npm audit
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scan dependencies
+        run: npm audit --audit-level=high
