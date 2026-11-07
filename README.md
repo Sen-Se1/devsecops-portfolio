@@ -313,7 +313,7 @@ The following GitHub Actions jobs are required before merging:
 
 The following screenshot demonstrates GitHub preventing a Pull Request from being merged because a required CI/CD check failed.
 
-![Pull Request blocked by a failed required status check](images/81-blocked-pull-request.png)
+![Pull Request blocked by a failed required status check](images/56-blocked-pull-request.png)
 
 #### Security Benefits
 
@@ -327,3 +327,4 @@ The following screenshot demonstrates GitHub preventing a Pull Request from bein
 #### Conclusion
 
 Mandatory CI/CD status checks ensure that code changes are tested and security-validated before integration into the main branch. This reduces the risk of introducing vulnerable or unstable code into the project.
+
