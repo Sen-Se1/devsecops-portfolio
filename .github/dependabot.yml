@@ -1,41 +1,17 @@
 version: 2
 
 updates:
-  # Frontend - Next.js / React
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "08:00"
-      timezone: "Africa/Tunis"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "frontend"
 
-  # Backend - Express / Prisma
   - package-ecosystem: "npm"
     directory: "/api"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "08:00"
-      timezone: "Africa/Tunis"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "backend"
 
-  # GitHub Actions
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directory: "/.github/workflows"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "08:00"
-      timezone: "Africa/Tunis"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "github-actions"
