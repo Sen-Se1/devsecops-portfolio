@@ -207,4 +207,65 @@ Jenkins remains a powerful alternative for organizations requiring extensive cus
 
 ## XVIII. Git Workflow
 
+### 79. Git Branching and Pull Request Strategy
+
+#### Objective
+
+Establish a structured Git collaboration strategy based on the following workflow:
+
+**Branch → Pull Request → Review → Merge**
+
+This approach improves code quality, collaboration and traceability.
+
+#### Branch Naming Convention
+
+The project uses descriptive branch names with prefixes indicating the purpose of each change.
+
+| Branch Type | Naming Convention | Example |
+|---|---|---|
+| Feature | `feature/description` | `feature/user-dashboard` |
+| Bug Fix | `fix/description` | `fix/login-validation` |
+| Security | `security/description` | `security/update-dependencies` |
+| Documentation | `docs/description` | `docs/update-readme` |
+| Refactoring | `refactor/description` | `refactor/api-structure` |
+| Tests | `test/description` | `test/api-integration` |
+
+#### Branch Strategy
+
+- `main`: Main stable branch.
+- `Activite-5`: Development branch used for the current DevSecOps activity.
+- Feature and maintenance branches: Created from the development branch to isolate individual changes.
+
+#### Pull Request Workflow
+
+1. **Branch:** Create a dedicated branch for a feature, bug fix, security improvement or documentation update.
+2. **Pull Request:** Push the changes and open a Pull Request targeting the development branch.
+3. **Review:** Review the proposed changes and verify code quality, tests and security checks.
+4. **Merge:** Merge the Pull Request after approval and successful CI/CD checks.
+
+#### Example Git Commands
+
+```bash
+git checkout Activite-5
+git pull origin Activite-5
+
+git checkout -b security/improve-api-security
+
+git add .
+git commit -m "security: improve API security"
+
+git push -u origin security/improve-api-security
+```
+
+#### Benefits
+
+- Keeps development work isolated.
+- Improves code review and collaboration.
+- Prevents unreviewed changes from being merged directly.
+- Integrates automated CI/CD checks into the Pull Request process.
+- Improves project history and traceability.
+
+#### Conclusion
+
+The Branch → Pull Request → Review → Merge strategy provides a controlled development workflow. It helps maintain code quality and ensures that changes are reviewed and validated before integration.
 
