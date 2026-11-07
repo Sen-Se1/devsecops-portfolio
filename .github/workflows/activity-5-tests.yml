@@ -1,5 +1,5 @@
 
-name: Activity 5 - CI Security Pipeline
+name: Activity 5 - Sequential CI Security Pipeline
 
 on:
   push:
@@ -20,10 +20,10 @@ concurrency:
 jobs:
 
   # ==========================================
-  # 1. FRONTEND TESTS
+  # STAGE 1 - FRONTEND TESTS
   # ==========================================
   frontend-tests:
-    name: Frontend Tests
+    name: "Stage 1 - Frontend Tests"
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -45,10 +45,11 @@ jobs:
 
 
   # ==========================================
-  # 2. API TESTS
+  # STAGE 2 - API TESTS
   # ==========================================
   api-tests:
-    name: API Tests
+    name: "Stage 2 - API Tests"
+    needs: frontend-tests
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -101,10 +102,11 @@ jobs:
 
 
   # ==========================================
-  # 3. SECRET SCANNING - GITLEAKS
+  # STAGE 3 - SECRET SCANNING
   # ==========================================
   secret-scanning:
-    name: Secret Scanning - Gitleaks
+    name: "Stage 3 - Secret Scanning"
+    needs: api-tests
     runs-on: ubuntu-24.04
     timeout-minutes: 10
 
@@ -114,17 +116,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Scan repository for secrets
+      - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
   # ==========================================
-  # 4. SAST - SEMGREP
+  # STAGE 4 - SAST
   # ==========================================
   sast:
-    name: SAST - Semgrep
+    name: "Stage 4 - SAST Semgrep"
+    needs: secret-scanning
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -147,10 +150,11 @@ jobs:
 
 
   # ==========================================
-  # 5. FRONTEND DEPENDENCY SCANNING
+  # STAGE 5 - FRONTEND DEPENDENCY SCANNING
   # ==========================================
   frontend-dependencies:
-    name: Frontend Dependency Scan
+    name: "Stage 5 - Frontend Dependency Scan"
+    needs: sast
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -172,10 +176,11 @@ jobs:
 
 
   # ==========================================
-  # 6. API DEPENDENCY SCANNING
+  # STAGE 6 - API DEPENDENCY SCANNING
   # ==========================================
   api-dependencies:
-    name: API Dependency Scan
+    name: "Stage 6 - API Dependency Scan"
+    needs: frontend-dependencies
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
