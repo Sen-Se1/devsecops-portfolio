@@ -254,3 +254,29 @@ jobs:
 
       - name: Display Docker Images
         run: docker images
+
+      # ----------------------------------------
+      # Scan frontend image with Trivy
+      # ----------------------------------------
+      - name: Trivy - Scan Frontend Image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: devsecops-portfolio:${{ github.sha }}
+          format: table
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'
+
+      # ----------------------------------------
+      # Scan API image with Trivy
+      # ----------------------------------------
+      - name: Trivy - Scan API Image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: devsecops-api:${{ github.sha }}
+          format: table
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'
