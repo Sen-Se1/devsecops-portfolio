@@ -204,3 +204,53 @@ jobs:
 
       - name: Audit API dependencies
         run: npm audit --audit-level=high
+
+  # ==========================================
+  # STAGE 7 - DOCKER IMAGE BUILD
+  # ==========================================
+  docker-build:
+    name: "Stage 7 - Build Docker Images"
+    needs: api-dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Verify Docker installation
+        run: docker --version
+
+      # ----------------------------------------
+      # Build frontend image
+      # ----------------------------------------
+      - name: Build Frontend Docker Image
+        run: |
+          docker build \
+            --file Dockerfile \
+            --tag devsecops-portfolio:${GITHUB_SHA} \
+            --tag devsecops-portfolio:latest \
+            .
+
+      # ----------------------------------------
+      # Build API image
+      # ----------------------------------------
+      - name: Build API Docker Image
+        run: |
+          docker build \
+            --file api/Dockerfile \
+            --tag devsecops-api:${GITHUB_SHA} \
+            --tag devsecops-api:latest \
+            ./api
+
+      # ----------------------------------------
+      # Verify both images
+      # ----------------------------------------
+      - name: Verify Docker Images
+        run: |
+          echo "=== Docker Images Built Successfully ==="
+          docker image inspect devsecops-portfolio:${GITHUB_SHA}
+          docker image inspect devsecops-api:${GITHUB_SHA}
+
+      - name: Display Docker Images
+        run: docker images
