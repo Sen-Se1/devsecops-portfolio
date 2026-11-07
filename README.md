@@ -101,27 +101,68 @@ The workflow is as follows:
 
 The following screenshot demonstrates an automatically generated dependency update Pull Request.
 
-![Dependabot automatically generated Pull Request](images/75-dependabot-pull-request.png)
-
-**Pull Request evidence should show:**
-- The author `dependabot[bot]`.
-- The dependency being updated.
-- The previous and proposed versions.
-- The Pull Request title and description.
-- The CI/CD checks associated with the update.
-
-#### Verification
-
-The configuration can be verified by checking:
-
-1. The presence of `.github/dependabot.yml` in the repository.
-2. The enabled Dependency Graph feature.
-3. The enabled Dependabot alerts.
-4. The enabled Dependabot security updates.
-5. An automatically generated Pull Request from `dependabot[bot]`.
+![Dependabot automatically generated Pull Request](images/55-dependabot-pull-request.png)
 
 #### Conclusion
 
 GitHub Dependabot automates dependency monitoring and update proposals for the frontend, backend and GitHub Actions components.
 
 By generating Pull Requests for available updates, Dependabot helps developers identify vulnerable dependencies, apply security fixes and maintain a more secure software supply chain.
+
+### 77. Pinning GitHub Actions to Immutable Commit SHAs
+
+#### Objective
+
+Improve CI/CD supply-chain security by pinning third-party GitHub Actions to immutable commit SHAs instead of relying on mutable version tags.
+
+#### Configuration
+
+All third-party actions used in the Activity 5 workflow are referenced using full commit SHAs.
+
+Examples:
+
+| GitHub Action | Reference |
+|---|---|
+| `actions/checkout` | `08c6903cd8c0fde910a37f88322edcfb5dd907a8` |
+| `actions/setup-node` | `a0853c24544627f65ddf259abe73b1d18a591444` |
+| `gitleaks/gitleaks-action` | `e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e` |
+| `aquasecurity/trivy-action` | `ed142fd0673e97e23eac54620cfb913e5ce36c25` |
+
+Example:
+
+```yaml
+- name: Checkout repository
+  uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+```
+
+#### Why CI/CD Pipelines Are an Attack Surface
+
+CI/CD pipelines are part of the software supply chain because they execute code, access credentials, build artifacts and perform automated operations.
+
+Using third-party GitHub Actions introduces an additional security risk. If an action maintainer's account or repository is compromised, a malicious update to a mutable tag could cause workflows to execute unauthorized code.
+
+Potential consequences include:
+
+- Exposure or theft of workflow secrets and authentication tokens.
+- Unauthorized modification of build artifacts.
+- Injection of malicious code into Docker images.
+- Compromise of deployment processes.
+- Software supply-chain attacks.
+
+#### Security Benefits
+
+Pinning actions to full commit SHAs:
+
+- Ensures workflows reference a specific source-code revision.
+- Prevents unexpected changes caused by moving version tags.
+- Improves reproducibility and traceability.
+- Reduces the risk of malicious third-party action updates.
+- Helps maintain control over CI/CD dependencies.
+
+#### Verification
+
+All third-party `uses:` references in the Activity 5 workflow were checked to ensure that they use full commit SHAs rather than mutable version tags.
+
+#### Conclusion
+
+Pinning GitHub Actions to immutable commit SHAs reduces the CI/CD supply-chain attack surface and provides greater control over the code executed during automated builds and security checks.
