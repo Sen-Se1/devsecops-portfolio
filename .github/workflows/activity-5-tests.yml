@@ -4,10 +4,12 @@ name: Activity 5 - Sequential CI Security Pipeline
 on:
   push:
     branches:
+      - main
       - Activite-5
 
   pull_request:
     branches:
+      - main
       - Activite-5
 
 permissions:

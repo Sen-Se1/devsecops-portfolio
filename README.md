@@ -269,3 +269,61 @@ git push -u origin security/improve-api-security
 
 The Branch → Pull Request → Review → Merge strategy provides a controlled development workflow. It helps maintain code quality and ensures that changes are reviewed and validated before integration.
 
+### 81. Mandatory CI/CD Checks Before Pull Request Merging
+
+#### Objective
+
+Enforce mandatory quality and security checks before allowing Pull Requests to be merged into the `main` branch.
+
+#### Branch Protection Configuration
+
+The `main` branch protection rule was configured with the following requirements:
+
+- Require status checks to pass before merging.
+- Require branches to be up to date before merging.
+- Require a Pull Request before merging.
+- Require an approving review.
+
+#### Mandatory CI/CD Checks
+
+The following GitHub Actions jobs are required before merging:
+
+| Security or Quality Control | GitHub Actions Job | Tool |
+|---|---|---|
+| Frontend Tests | Frontend Tests | Jest |
+| API Tests | API Tests | Jest |
+| Secret Scanning | Secret Scanning | Gitleaks |
+| SAST | SAST Semgrep | Semgrep |
+| Frontend Dependency Scanning | Frontend Dependency Scan | npm audit |
+| API Dependency Scanning | API Dependency Scan | npm audit |
+| Docker Image Scanning | Build Docker Images | Trivy |
+
+#### Pull Request Validation Process
+
+1. A developer opens a Pull Request targeting `main`.
+2. GitHub Actions automatically executes the CI/CD pipeline.
+3. Frontend and API tests are executed.
+4. Secret scanning and SAST checks are performed.
+5. Frontend and API dependencies are audited.
+6. Docker images are built and scanned with Trivy.
+7. GitHub verifies the required status checks.
+8. The Pull Request can only be merged when all required checks succeed and the review requirements are satisfied.
+
+#### Screenshot – Pull Request Blocked by a Failed Check
+
+The following screenshot demonstrates GitHub preventing a Pull Request from being merged because a required CI/CD check failed.
+
+![Pull Request blocked by a failed required status check](images/81-blocked-pull-request.png)
+
+#### Security Benefits
+
+- Prevents code with failing tests from being merged.
+- Blocks changes that fail security scans.
+- Detects exposed secrets before integration.
+- Identifies vulnerable dependencies.
+- Prevents Docker images with failing security scans from passing the required pipeline.
+- Enforces a consistent quality and security validation process.
+
+#### Conclusion
+
+Mandatory CI/CD status checks ensure that code changes are tested and security-validated before integration into the main branch. This reduces the risk of introducing vulnerable or unstable code into the project.
