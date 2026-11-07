@@ -1,10 +1,10 @@
-
 name: Activity 5 - CI Security Pipeline
 
 on:
   push:
     branches:
       - Activite-5
+
   pull_request:
     branches:
       - Activite-5
@@ -18,35 +18,38 @@ concurrency:
 
 jobs:
 
-  # ==================================
+  # ==========================================
   # 1. FRONTEND TESTS
-  # ==================================
+  # ==========================================
   frontend-tests:
     name: Frontend Tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
       - name: Run frontend tests
         run: npm test -- --runInBand
 
-  # ==================================
+
+  # ==========================================
   # 2. API TESTS
-  # ==================================
+  # ==========================================
   api-tests:
     name: API Tests
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -55,8 +58,10 @@ jobs:
           POSTGRES_DB: portfolio_test
           POSTGRES_USER: portfolio_user
           POSTGRES_PASSWORD: portfolio_pass
+
         ports:
           - 5432:5432
+
         options: >-
           --health-cmd "pg_isready -U portfolio_user -d portfolio_test"
           --health-interval 10s
@@ -73,110 +78,125 @@ jobs:
       CORS_ORIGIN: http://localhost:3000
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      - name: Install dependencies
+      - name: Install API dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
+      - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Apply migrations
+      - name: Apply database migrations
         run: npx prisma migrate deploy
 
       - name: Run API tests
         run: npm test
 
-  # ==================================
+
+  # ==========================================
   # 3. SECRET SCANNING - GITLEAKS
-  # ==================================
+  # ==========================================
   secret-scanning:
     name: Secret Scanning - Gitleaks
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout full Git history
-        uses: actions/checkout@v5
+      - name: Checkout full repository history
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
       - name: Scan repository for secrets
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ==================================
+
+  # ==========================================
   # 4. SAST - SEMGREP
-  # ==================================
+  # ==========================================
   sast:
     name: SAST - Semgrep
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
 
       - name: Install Semgrep
         run: |
-          pipx install semgrep
+          python -m pip install --upgrade pip
+          python -m pip install semgrep
 
-      - name: Scan source code
-        run: |
-          semgrep scan --config auto --error .
+      - name: Run Semgrep SAST scan
+        run: semgrep scan --config auto --error .
 
-  # ==================================
+
+  # ==========================================
   # 5. FRONTEND DEPENDENCY SCANNING
-  # ==================================
+  # ==========================================
   frontend-dependencies:
-    name: Frontend Dependencies - npm audit
+    name: Frontend Dependency Scan
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Scan dependencies
+      - name: Audit frontend dependencies
         run: npm audit --audit-level=high
 
-  # ==================================
+
+  # ==========================================
   # 6. API DEPENDENCY SCANNING
-  # ==================================
+  # ==========================================
   api-dependencies:
-    name: API Dependencies - npm audit
+    name: API Dependency Scan
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     defaults:
       run:
         working-directory: api
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      - name: Install dependencies
+      - name: Install API dependencies
         run: npm ci
 
-      - name: Scan dependencies
+      - name: Audit API dependencies
         run: npm audit --audit-level=high
