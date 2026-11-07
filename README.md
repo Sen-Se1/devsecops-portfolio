@@ -166,3 +166,45 @@ All third-party `uses:` references in the Activity 5 workflow were checked to en
 #### Conclusion
 
 Pinning GitHub Actions to immutable commit SHAs reduces the CI/CD supply-chain attack surface and provides greater control over the code executed during automated builds and security checks.
+
+### 78. Comparison Between GitHub Actions and Jenkins
+
+#### Objective
+
+Compare GitHub Actions and Jenkins as CI/CD automation platforms used in DevSecOps environments.
+
+#### Comparison
+
+| Criteria | GitHub Actions | Jenkins |
+|---|---|---|
+| Hosting | GitHub-hosted or self-hosted runners | Self-hosted infrastructure |
+| Configuration | YAML workflow files | Jenkinsfile |
+| GitHub integration | Native integration | Requires plugins and configuration |
+| Pipeline triggers | Push, Pull Request, schedule and manual execution | Webhooks, schedules and manual execution |
+| Maintenance | Managed runners reduce infrastructure maintenance | Requires Jenkins server, agents and plugin maintenance |
+| Extensibility | GitHub Actions Marketplace | Extensive plugin ecosystem |
+| Security | GITHUB_TOKEN permissions and SHA-pinned actions | Credentials management, RBAC and plugin security |
+
+#### Advantages and Limitations
+
+**GitHub Actions:**
+- Easy integration with GitHub repositories and Pull Requests.
+- Simple YAML-based workflow configuration.
+- Direct integration with security tools such as Gitleaks, Semgrep and Trivy.
+- Reduced infrastructure maintenance when using GitHub-hosted runners.
+
+**Jenkins:**
+- Highly customizable CI/CD pipelines.
+- Extensive plugin ecosystem.
+- Greater control over build infrastructure and execution environments.
+- Requires additional administration and maintenance.
+
+#### Conclusion
+
+For this DevSecOps portfolio project, GitHub Actions is a suitable choice because the source code is hosted on GitHub and the platform provides native integration with Pull Requests, automated testing and security scanning.
+
+Jenkins remains a powerful alternative for organizations requiring extensive customization, dedicated infrastructure and complex CI/CD integrations.
+
+## XVIII. Git Workflow
+
+
