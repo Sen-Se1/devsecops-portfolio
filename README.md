@@ -441,3 +441,4 @@ Build time and vulnerability counts must be evaluated using the same build envir
 The multi-stage Docker build approach helps produce more lightweight and security-focused container images.
 
 The measured results above provide a quantitative comparison of the optimization performed on the Next.js frontend and Express API.
+
