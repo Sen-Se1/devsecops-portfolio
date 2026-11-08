@@ -13,6 +13,7 @@
           { "type": "security", "release": "patch" },
           { "type": "ci", "release": "patch" },
           { "type": "build", "release": "patch" },
+          { "type": "docs", "release": "patch" },
           { "breaking": true, "release": "major" }
         ]
       }
