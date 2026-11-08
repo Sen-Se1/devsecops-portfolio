@@ -35,6 +35,6 @@
     "jest-junit": "^17.0.0",
     "semantic-release": "^25.0.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^7"
   }
 }
