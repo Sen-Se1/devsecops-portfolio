@@ -442,3 +442,62 @@ The multi-stage Docker build approach helps produce more lightweight and securit
 
 The measured results above provide a quantitative comparison of the optimization performed on the Next.js frontend and Express API.
 
+### 89. Multi-Architecture Docker Images
+
+#### Objective
+
+Build and publish Docker images for multiple CPU architectures using Docker Buildx and GitHub Actions.
+
+#### Supported Architectures
+
+Both frontend and API Docker images are built and published for the following platforms:
+
+- `linux/amd64`
+- `linux/arm64`
+
+#### Published Images
+
+| Application | GHCR Image | Supported Platforms |
+|---|---|---|
+| Frontend | `ghcr.io/sen-se1/devsecops-portfolio-frontend:latest` | `linux/amd64`, `linux/arm64` |
+| API | `ghcr.io/sen-se1/devsecops-portfolio-api:latest` | `linux/amd64`, `linux/arm64` |
+
+#### Verification with Docker Buildx
+
+The multi-architecture manifests were verified using:
+
+```bash
+docker buildx imagetools inspect ghcr.io/sen-se1/devsecops-portfolio-frontend:latest
+
+docker buildx imagetools inspect ghcr.io/sen-se1/devsecops-portfolio-api:latest
+```
+
+#### Verification Results
+
+**Frontend image:**
+- `linux/amd64` – Available
+- `linux/arm64` – Available
+
+**API image:**
+- `linux/amd64` – Available
+- `linux/arm64` – Available
+
+Both images also contain BuildKit attestation manifests (`unknown/unknown`), which are associated with image metadata and provenance.
+
+![Automatically generated semantic-release GitHub Release](images/58-images-multi-architecture.png)
+
+#### GitHub Actions Pipeline
+
+The CI/CD workflow uses:
+
+- **QEMU** to support cross-platform builds.
+- **Docker Buildx** to build multi-platform images.
+- **GitHub Container Registry (GHCR)** to store the images.
+- **Docker Buildx Imagetools** to inspect and verify the published manifests.
+
+#### Result
+
+The multi-architecture build and publication process completed successfully. Both Docker images are available for AMD64 and ARM64 platforms.
+
+## XX. Harbor Private Registry
+
