@@ -1,3 +1,5 @@
+## [1.0.8](https://github.com/Sen-Se1/devsecops-portfolio/compare/v1.0.7...v1.0.8) (2026-11-08)
+
 ## [1.0.7](https://github.com/Sen-Se1/devsecops-portfolio/compare/v1.0.6...v1.0.7) (2026-11-08)
 
 
