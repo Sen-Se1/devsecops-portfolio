@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/Sen-Se1/devsecops-portfolio/compare/v1.0.6...v1.0.7) (2026-11-08)
+
+
+### Bug Fixes
+
+* normalize GHCR image names for multi-arch builds ([3ff4b51](https://github.com/Sen-Se1/devsecops-portfolio/commit/3ff4b51b0df4e2dbbc47c4d3a942147c11f704f5))
+
 ## [1.0.6](https://github.com/Sen-Se1/devsecops-portfolio/compare/v1.0.5...v1.0.6) (2026-11-08)
 
 ## [1.0.5](https://github.com/Sen-Se1/devsecops-portfolio/compare/v1.0.4...v1.0.5) (2026-11-08)
