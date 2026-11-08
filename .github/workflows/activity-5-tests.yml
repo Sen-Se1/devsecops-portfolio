@@ -184,11 +184,23 @@ jobs:
       - name: Audit API dependencies
         run: npm audit --audit-level=high
 
+
+  # ==========================================
+  # 7. DOCKER BUILD - MULTI ARCHITECTURE
+  # ==========================================
   docker-build:
-    name: "Build Docker Images"
+    name: "Build Docker Images - AMD64 and ARM64"
     needs: api-dependencies
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      FRONTEND_IMAGE: ghcr.io/${{ github.repository }}-frontend
+      API_IMAGE: ghcr.io/${{ github.repository }}-api
 
     steps:
       - name: Checkout repository
@@ -197,35 +209,63 @@ jobs:
       - name: Verify Docker installation
         run: docker --version
 
-      - name: Build Frontend Docker Image
-        run: |
-          docker build \
-            --file Dockerfile \
-            --tag devsecops-portfolio:${GITHUB_SHA} \
-            --tag devsecops-portfolio:latest \
-            .
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
 
-      - name: Build API Docker Image
-        run: |
-          docker build \
-            --file api/Dockerfile \
-            --tag devsecops-api:${GITHUB_SHA} \
-            --tag devsecops-api:latest \
-            ./api
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
-      - name: Verify Docker Images
-        run: |
-          echo "=== Docker Images Built Successfully ==="
-          docker image inspect devsecops-portfolio:${GITHUB_SHA}
-          docker image inspect devsecops-api:${GITHUB_SHA}
+      - name: Login to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Display Docker Images
-        run: docker images
+      - name: Build and Push Frontend Multi-Arch Image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Build and Push API Multi-Arch Image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ${{ env.API_IMAGE }}:latest
+            ${{ env.API_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Inspect Frontend Multi-Arch Manifest
+        if: github.event_name == 'push'
+        run: |
+          docker buildx imagetools inspect \
+            "${FRONTEND_IMAGE}:latest"
+
+      - name: Inspect API Multi-Arch Manifest
+        if: github.event_name == 'push'
+        run: |
+          docker buildx imagetools inspect \
+            "${API_IMAGE}:latest"
 
       - name: Trivy - Scan Frontend Image
+        if: github.event_name == 'push'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: devsecops-portfolio:${{ github.sha }}
+          image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           format: table
           vuln-type: os,library
           severity: HIGH,CRITICAL
@@ -233,9 +273,10 @@ jobs:
           exit-code: '1'
 
       - name: Trivy - Scan API Image
+        if: github.event_name == 'push'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: devsecops-api:${{ github.sha }}
+          image-ref: ${{ env.API_IMAGE }}:${{ github.sha }}
           format: table
           vuln-type: os,library
           severity: HIGH,CRITICAL
