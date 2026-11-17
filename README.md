@@ -501,13 +501,13 @@ The multi-architecture build and publication process completed successfully. Bot
 
 ## XX. Harbor Private Registry
 
-### Activity 91 – Publish Frontend and API Images to Harbor
+### 91. Publish Frontend and API Images to Harbor
 
 #### Harbor Registry Information
 
 - **Registry:** `192.168.122.125:8082`
 - **Project:** `devsecops-portfolio`
-- **Access:** Private
+- **Access:** Public
 
 #### Published Docker Images
 
@@ -554,3 +554,28 @@ docker buildx imagetools inspect \
 GitHub Actions uses Docker Buildx to build multi-platform images and publish them to the private Harbor registry. Harbor credentials are stored securely in GitHub Actions Secrets.
 
 **Expected Result:** Frontend and API images are available in the private Harbor project with `latest` and commit SHA tags.
+
+### 91. PGitHub Container Registry (GHCR) vs Harbor
+
+This project uses both GitHub Container Registry (GHCR) and Harbor to store and manage Docker images.
+
+| Criteria | GitHub Container Registry (GHCR) | Harbor |
+|---|---|---|
+| Hosting | Cloud-managed by GitHub | Self-hosted |
+| Integration | Native GitHub Actions integration | Integrates with external CI/CD pipelines |
+| Access control | GitHub permissions and package access | Project-based RBAC and Robot Accounts |
+| Vulnerability scanning | No native equivalent to Harbor's built-in scanner | Integrated Trivy vulnerability scanning |
+| Image retention | Package deletion and cleanup policies | Configurable tag retention policies |
+| Multi-architecture images | Supported | Supported |
+| Maintenance | Managed by GitHub | Requires self-hosting and maintenance |
+| Best use case | Simple CI/CD image storage | Centralized and secure container management |
+
+#### Why use both?
+
+- **GHCR** is used to publish Docker images directly from GitHub Actions, benefiting from native GitHub integration.
+- **Harbor** provides additional security and registry management features, including RBAC, Robot Accounts, automatic vulnerability scanning with Trivy, and image retention policies.
+
+Using both registries provides flexibility: GHCR offers seamless GitHub integration, while Harbor provides greater control over image security and lifecycle management.
+
+## XXI. Software Supply Chain Security
+

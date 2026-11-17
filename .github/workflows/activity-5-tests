@@ -1,0 +1,289 @@
+
+name: Activity 5 - Sequential CI Security Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - Activite-5
+
+  pull_request:
+    branches:
+      - main
+      - Activite-5
+
+permissions:
+  contents: read
+
+concurrency:
+  group: activity-5-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  frontend-tests:
+    name: "Frontend Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm test -- --runInBand
+
+  api-tests:
+    name: "API Tests"
+    needs: frontend-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: portfolio_test
+          POSTGRES_USER: portfolio_user
+          POSTGRES_PASSWORD: portfolio_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portfolio_user -d portfolio_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: api
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://portfolio_user:portfolio_pass@localhost:5432/portfolio_test?schema=public
+      CORS_ORIGIN: http://localhost:3000
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install API dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Run API tests
+        run: npm test
+
+  secret-scanning:
+    name: "Secret Scanning"
+    needs: api-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout full repository history
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sast:
+    name: "SAST Semgrep"
+    needs: secret-scanning
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Create Python virtual environment
+        run: |
+          python3 -m venv "$RUNNER_TEMP/semgrep-venv"
+          echo "$RUNNER_TEMP/semgrep-venv/bin" >> "$GITHUB_PATH"
+
+      - name: Install Semgrep
+        run: |
+          "$RUNNER_TEMP/semgrep-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/semgrep-venv/bin/python" -m pip install semgrep
+
+      - name: Run Semgrep SAST scan
+        run: semgrep scan --config auto --error .
+
+  frontend-dependencies:
+    name: "Frontend Dependency Scan"
+    needs: sast
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=high
+
+  api-dependencies:
+    name: "API Dependency Scan"
+    needs: frontend-dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install API dependencies
+        run: npm ci
+
+      - name: Audit API dependencies
+        run: npm audit --audit-level=high
+
+  docker-build:
+    name: "Build Docker Images - AMD64 and ARM64"
+    needs: api-dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set lowercase image names
+        shell: bash
+        run: |
+          OWNER_LC="${GITHUB_REPOSITORY_OWNER,,}"
+          REPOSITORY_LC="${GITHUB_REPOSITORY##*/}"
+          REPOSITORY_LC="${REPOSITORY_LC,,}"
+
+          echo "FRONTEND_IMAGE=ghcr.io/${OWNER_LC}/${REPOSITORY_LC}-frontend" >> "$GITHUB_ENV"
+          echo "API_IMAGE=ghcr.io/${OWNER_LC}/${REPOSITORY_LC}-api" >> "$GITHUB_ENV"
+
+      - name: Display image names
+        run: |
+          echo "Frontend: $FRONTEND_IMAGE"
+          echo "API: $API_IMAGE"
+
+      - name: Verify Docker installation
+        run: docker --version
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Frontend Multi-Arch Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Build and Push API Multi-Arch Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ${{ env.API_IMAGE }}:latest
+            ${{ env.API_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Inspect Frontend Multi-Arch Manifest
+        if: github.event_name == 'push'
+        run: |
+          docker buildx imagetools inspect "$FRONTEND_IMAGE:latest"
+
+      - name: Inspect API Multi-Arch Manifest
+        if: github.event_name == 'push'
+        run: |
+          docker buildx imagetools inspect "$API_IMAGE:latest"
+
+      - name: Trivy - Scan Frontend Image
+        if: github.event_name == 'push'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          format: table
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'
+
+      - name: Trivy - Scan API Image
+        if: github.event_name == 'push'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.API_IMAGE }}:${{ github.sha }}
+          format: table
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'
