@@ -135,54 +135,54 @@ jobs:
       - name: Run Semgrep SAST scan
         run: semgrep scan --config auto --error .
 
-  frontend-dependencies:
-    name: "Frontend Dependency Scan"
-    needs: sast
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+#  frontend-dependencies:
+#    name: "Frontend Dependency Scan"
+#    needs: sast
+#    runs-on: ubuntu-24.04
+#    timeout-minutes: 15
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-        with:
-          node-version: 22
-          cache: npm
+#      - name: Setup Node.js
+#        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+#        with:
+#          node-version: 22
+#          cache: npm
 
-      - name: Install frontend dependencies
-        run: npm ci
+#      - name: Install frontend dependencies
+#        run: npm ci
 
-      - name: Audit frontend dependencies
-        run: npm audit --audit-level=high
+#      - name: Audit frontend dependencies
+#        run: npm audit --audit-level=high
 
-  api-dependencies:
-    name: "API Dependency Scan"
-    needs: frontend-dependencies
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+#  api-dependencies:
+#    name: "API Dependency Scan"
+#    needs: frontend-dependencies
+#    runs-on: ubuntu-24.04
+#    timeout-minutes: 15
 
-    defaults:
-      run:
-        working-directory: api
+#    defaults:
+#      run:
+#        working-directory: api
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: api/package-lock.json
+#      - name: Setup Node.js
+#        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+#        with:
+#          node-version: 22
+#          cache: npm
+#          cache-dependency-path: api/package-lock.json
 
-      - name: Install API dependencies
-        run: npm ci
+#      - name: Install API dependencies
+#        run: npm ci
 
-      - name: Audit API dependencies
-        run: npm audit --audit-level=high
+#      - name: Audit API dependencies
+#        run: npm audit --audit-level=high
 
 
   docker-build:

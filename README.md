@@ -501,3 +501,56 @@ The multi-architecture build and publication process completed successfully. Bot
 
 ## XX. Harbor Private Registry
 
+### Activity 91 – Publish Frontend and API Images to Harbor
+
+#### Harbor Registry Information
+
+- **Registry:** `192.168.122.125:8082`
+- **Project:** `devsecops-portfolio`
+- **Access:** Private
+
+#### Published Docker Images
+
+The GitHub Actions pipeline builds and publishes the Frontend and API images to Harbor.
+
+| Application | Full Image Name | Tags |
+|---|---|---|
+| Frontend | `192.168.122.125:8082/devsecops-portfolio/frontend` | `latest`, `${GITHUB_SHA}` |
+| API | `192.168.122.125:8082/devsecops-portfolio/api` | `latest`, `${GITHUB_SHA}` |
+
+#### Pull Commands
+
+**Frontend:**
+
+```bash
+docker pull 192.168.122.125:8082/devsecops-portfolio/frontend:latest
+```
+
+**API:**
+
+```bash
+docker pull 192.168.122.125:8082/devsecops-portfolio/api:latest
+```
+
+#### Multi-Architecture Support
+
+Both images support:
+
+- `linux/amd64`
+- `linux/arm64`
+
+#### Verification
+
+```bash
+docker buildx imagetools inspect \
+  192.168.122.125:8082/devsecops-portfolio/frontend:latest
+
+docker buildx imagetools inspect \
+  192.168.122.125:8082/devsecops-portfolio/api:latest
+```
+
+#### CI/CD Integration
+
+GitHub Actions uses Docker Buildx to build multi-platform images and publish them to the private Harbor registry. Harbor credentials are stored securely in GitHub Actions Secrets.
+
+**Expected Result:** Frontend and API images are available in the private Harbor project with `latest` and commit SHA tags.
