@@ -187,7 +187,7 @@ jobs:
 
   docker-build:
     name: "Build Docker Images - AMD64 and ARM64"
-    needs: api-dependencies
+    needs: sast
     runs-on: [self-hosted, linux, x64]
     timeout-minutes: 60
 
