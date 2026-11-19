@@ -579,3 +579,83 @@ Using both registries provides flexibility: GHCR offers seamless GitHub integrat
 
 ## XXI. Software Supply Chain Security
 
+
+### 100. Verify Docker Image Signatures Before Use with Cosign
+
+#### Objective
+
+Verify the authenticity of Docker images with Sigstore Cosign before pulling or running them. The verification checks that the image was signed by the expected GitHub Actions workflow using GitHub OIDC identity.
+
+#### Verify the GHCR Frontend Image
+
+Replace `<COMMIT_SHA>` with the commit SHA tag of the image published by GitHub Actions.
+
+```bash
+IMAGE="ghcr.io/sen-se1/devsecops-portfolio-frontend"
+TAG="<COMMIT_SHA>"
+
+cosign verify \
+  --certificate-identity-regexp="^https://github.com/Sen-Se1/devsecops-portfolio/.github/workflows/.*" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  "${IMAGE}:${TAG}"
+```
+
+#### Verify the GHCR API Image
+
+```bash
+IMAGE="ghcr.io/sen-se1/devsecops-portfolio-api"
+TAG="<COMMIT_SHA>"
+
+cosign verify \
+  --certificate-identity-regexp="^https://github.com/Sen-Se1/devsecops-portfolio/.github/workflows/.*" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  "${IMAGE}:${TAG}"
+```
+
+#### Verify the Harbor Frontend Image
+
+```bash
+IMAGE="192.168.122.125:8082/devsecops-portfolio/frontend"
+TAG="<COMMIT_SHA>"
+
+cosign verify \
+  --allow-http-registry \
+  --certificate-identity-regexp="^https://github.com/Sen-Se1/devsecops-portfolio/.github/workflows/.*" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  "${IMAGE}:${TAG}"
+```
+
+#### Verify Before Using the Image
+
+Only pull and use the image after successful signature verification.
+
+```bash
+docker pull ghcr.io/sen-se1/devsecops-portfolio-frontend:<COMMIT_SHA>
+```
+
+#### Expected Result
+
+A successful verification returns the signature and certificate information and exits with status code `0`.
+
+Example of expected successful status:
+
+```text
+Verification succeeded
+Cosign signature and certificate checks passed.
+Exit code: 0
+```
+
+The output above is illustrative. The exact output depends on the installed Cosign version.
+
+If the image is unsigned or its certificate identity or OIDC issuer does not match, verification fails with a non-zero exit code. Do not use an image when verification fails.
+
+#### Security Benefits
+
+- Verifies the authenticity of Docker images.
+- Confirms the expected GitHub Actions signing identity.
+- Detects unsigned or incorrectly signed images.
+- Adds an image verification step before deployment.
+
+#### Conclusion
+
+Cosign verification helps ensure that only authenticated and correctly signed container images are used. The frontend and API images published to GHCR and Harbor can be verified before deployment.
