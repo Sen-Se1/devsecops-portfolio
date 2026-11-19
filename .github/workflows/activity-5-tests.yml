@@ -306,12 +306,12 @@ jobs:
       # Activity 105: Temporary supply-chain attack simulation
       # This step is expected to FAIL because the test image has no Cosign signature.
       # Remove this step after collecting the GitHub Actions evidence.
-      - name: Test Supply Chain Attack - Unsigned Image
-        if: github.event_name == 'push'
-        continue-on-error: false
-        run: |
-          cosign verify \
-            docker.io/library/alpine:3.20
+#      - name: Test Supply Chain Attack - Unsigned Image
+#        if: github.event_name == 'push'
+#        continue-on-error: false
+#        run: |
+#          cosign verify \
+#            docker.io/library/alpine:3.20
 
       - name: Sign Frontend image on GHCR
         if: github.event_name == 'push' || github.event_name == 'release'
