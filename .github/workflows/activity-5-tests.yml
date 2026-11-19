@@ -12,6 +12,9 @@ on:
       - main
       - Activite-5
 
+  release:
+    types: [published]
+
 permissions:
   contents: read
 
@@ -135,54 +138,54 @@ jobs:
       - name: Run Semgrep SAST scan
         run: semgrep scan --config auto --error .
 
-#  frontend-dependencies:
-#    name: "Frontend Dependency Scan"
-#    needs: sast
-#    runs-on: ubuntu-24.04
-#    timeout-minutes: 15
-
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-
-#      - name: Setup Node.js
-#        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-#        with:
-#          node-version: 22
-#          cache: npm
-
-#      - name: Install frontend dependencies
-#        run: npm ci
-
-#      - name: Audit frontend dependencies
-#        run: npm audit --audit-level=high
-
-#  api-dependencies:
-#    name: "API Dependency Scan"
-#    needs: frontend-dependencies
-#    runs-on: ubuntu-24.04
-#    timeout-minutes: 15
-
-#    defaults:
-#      run:
-#        working-directory: api
-
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-
-#      - name: Setup Node.js
-#        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-#        with:
-#          node-version: 22
-#          cache: npm
-#          cache-dependency-path: api/package-lock.json
-
-#      - name: Install API dependencies
-#        run: npm ci
-
-#      - name: Audit API dependencies
-#        run: npm audit --audit-level=high
+  # frontend-dependencies:
+  #   name: "Frontend Dependency Scan"
+  #   needs: sast
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 15
+  #
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+  #
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+  #       with:
+  #         node-version: 22
+  #         cache: npm
+  #
+  #     - name: Install frontend dependencies
+  #       run: npm ci
+  #
+  #     - name: Audit frontend dependencies
+  #       run: npm audit --audit-level=high
+  #
+  # api-dependencies:
+  #   name: "API Dependency Scan"
+  #   needs: frontend-dependencies
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 15
+  #
+  #   defaults:
+  #     run:
+  #       working-directory: api
+  #
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+  #
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+  #       with:
+  #         node-version: 22
+  #         cache: npm
+  #         cache-dependency-path: api/package-lock.json
+  #
+  #     - name: Install API dependencies
+  #       run: npm ci
+  #
+  #     - name: Audit API dependencies
+  #       run: npm audit --audit-level=high
 
   docker-build:
     name: "Build Docker Images - AMD64 and ARM64"
@@ -191,8 +194,9 @@ jobs:
     timeout-minutes: 60
 
     permissions:
-      contents: read
+      contents: write
       packages: write
+      actions: read
 
     steps:
       - name: Checkout repository
@@ -226,7 +230,7 @@ jobs:
               insecure = true
 
       - name: Login to GHCR
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'release'
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
@@ -247,7 +251,7 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name == 'push' }}
+          push: ${{ github.event_name == 'push' || github.event_name == 'release' }}
           tags: |
             ${{ steps.images.outputs.frontend }}:latest
             ${{ steps.images.outputs.frontend }}:${{ github.sha }}
@@ -262,7 +266,7 @@ jobs:
           context: ./api
           file: ./api/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name == 'push' }}
+          push: ${{ github.event_name == 'push' || github.event_name == 'release' }}
           tags: |
             ${{ steps.images.outputs.api }}:latest
             ${{ steps.images.outputs.api }}:${{ github.sha }}
@@ -284,7 +288,7 @@ jobs:
         run: docker buildx imagetools inspect "$IMAGE:latest"
 
       - name: Trivy - Scan Frontend Image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'release'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ steps.images.outputs.frontend }}:${{ github.sha }}
@@ -295,7 +299,7 @@ jobs:
           exit-code: '1'
 
       - name: Trivy - Scan API Image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'release'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ steps.images.outputs.api }}:${{ github.sha }}
@@ -306,11 +310,11 @@ jobs:
           exit-code: '1'
 
       - name: Create SBOM directory
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'release'
         run: mkdir -p sbom
 
       - name: Syft - Generate Frontend SBOM
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'release'
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           image: ${{ steps.images.outputs.frontend }}:${{ github.sha }}
@@ -318,10 +322,11 @@ jobs:
           output-file: sbom/frontend.spdx.json
           artifact-name: sbom-frontend-${{ github.sha }}
           upload-artifact: true
-          upload-release-assets: false
+          upload-artifact-retention: 90
+          upload-release-assets: true
 
       - name: Syft - Generate API SBOM
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'release'
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           image: ${{ steps.images.outputs.api }}:${{ github.sha }}
@@ -329,5 +334,5 @@ jobs:
           output-file: sbom/api.spdx.json
           artifact-name: sbom-api-${{ github.sha }}
           upload-artifact: true
-          upload-release-assets: false
-
+          upload-artifact-retention: 90
+          upload-release-assets: true
