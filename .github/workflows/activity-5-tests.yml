@@ -343,7 +343,9 @@ jobs:
           echo "Signing Harbor API image..."
           cosign sign --yes --allow-http-registry "${IMAGE}@${DIGEST}"
 
-      - name: Verify Frontend signature on GHCR
+      # Activity 104: Reject unsigned or untrusted Docker images
+      - name: Enforce Frontend Signature on GHCR
+        continue-on-error: false
         if: github.event_name == 'push' || github.event_name == 'release'
         env:
           IMAGE: ${{ steps.images.outputs.frontend }}
@@ -355,7 +357,8 @@ jobs:
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
             "${IMAGE}@${DIGEST}"
 
-      - name: Verify API signature on GHCR
+      - name: Enforce API Signature on GHCR
+        continue-on-error: false
         if: github.event_name == 'push' || github.event_name == 'release'
         env:
           IMAGE: ${{ steps.images.outputs.api }}
@@ -367,7 +370,8 @@ jobs:
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
             "${IMAGE}@${DIGEST}"
 
-      - name: Verify Frontend signature on Harbor
+      - name: Enforce Frontend Signature on Harbor
+        continue-on-error: false
         if: github.event_name == 'push' || github.event_name == 'release'
         env:
           HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
@@ -382,7 +386,8 @@ jobs:
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
             "${IMAGE}@${DIGEST}"
 
-      - name: Verify API signature on Harbor
+      - name: Enforce API Signature on Harbor
+        continue-on-error: false
         if: github.event_name == 'push' || github.event_name == 'release'
         env:
           HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
