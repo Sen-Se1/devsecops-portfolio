@@ -196,6 +196,7 @@ jobs:
       contents: write
       packages: write
       id-token: write
+      attestations: write
       actions: read
 
     steps:
@@ -276,6 +277,23 @@ jobs:
             ${{ secrets.HARBOR_HOST }}/devsecops-portfolio/api:${{ github.sha }}
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
+
+      # Activity 101: Generate GitHub build provenance attestations
+      - name: Generate Frontend Build Attestation
+        if: github.event_name == 'push' || github.event_name == 'release'
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-name: ${{ steps.images.outputs.frontend }}
+          subject-digest: ${{ steps.build-frontend.outputs.digest }}
+          push-to-registry: false
+
+      - name: Generate API Build Attestation
+        if: github.event_name == 'push' || github.event_name == 'release'
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-name: ${{ steps.images.outputs.api }}
+          subject-digest: ${{ steps.build-api.outputs.digest }}
+          push-to-registry: false
 
       - name: Install Cosign
         if: github.event_name == 'push' || github.event_name == 'release'
