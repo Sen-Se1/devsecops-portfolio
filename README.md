@@ -728,3 +728,40 @@ The pipeline generates build provenance attestations associated with Docker imag
 Achieving higher levels requires adopting a suitable hosted build platform and implementing stronger build isolation and security controls.
 
 **Conclusion:** SLSA and in-toto principles improve software supply chain security by making artifact origins, build processes and production steps more traceable and verifiable.
+
+### 105. Simulate a Software Supply Chain Attack
+
+**Objective:**
+
+Simulate a supply chain attack using an unsigned Docker image and verify that the CI/CD pipeline rejects it.
+
+#### Attack Scenario
+
+An attacker attempts to introduce an unsigned Docker image into the software supply chain.
+
+The test uses the public Docker image `alpine:3.20` as an unsigned image.
+
+#### Simulation
+
+The following command is used to verify the image signature:
+
+```bash
+cosign verify docker.io/library/alpine:3.20
+```
+
+#### Expected Result
+
+Cosign fails to verify the image because it does not have a valid signature.
+
+The GitHub Actions pipeline stops at the signature verification step because `continue-on-error` is disabled.
+
+#### Security Impact
+
+- Unsigned images are rejected.
+- Invalid signatures prevent subsequent pipeline steps.
+- The verification gate reduces the risk of introducing untrusted container images.
+- Deployment must depend on successful signature verification.
+
+#### Conclusion
+
+The supply chain attack simulation demonstrates how Cosign protects the container image supply chain. The pipeline rejects images without valid signatures, helping prevent untrusted images from reaching deployment.
