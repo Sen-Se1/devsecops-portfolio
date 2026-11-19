@@ -279,7 +279,7 @@ jobs:
 
       - name: Install Cosign
         if: github.event_name == 'push' || github.event_name == 'release'
-        uses: sigstore/cosign-installer@v4.1.0
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
 
       - name: Verify Cosign installation
         if: github.event_name == 'push' || github.event_name == 'release'
